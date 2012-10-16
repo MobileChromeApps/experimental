@@ -1,8 +1,6 @@
 html {
-  height: 380px;
   margin: 0;
   padding: 0;
-  width: 244px;
   font-family: "Open Sans", "Hevatica Neue", "Helvetica", "Arial", sans-serif;
   font-weight: 700;
   font-size: 16px;
@@ -26,15 +24,12 @@ body {
   background-color: #fff;
   border: 0;
   margin: 0;
-  max-width: 244px;
-  min-width: 244px;
   padding: 0px;
 }
 
 #calc #display,
 #calc #display:focus {
   border: none;
-  bottom: 225px;
   letter-spacing: 1px;
   line-height: 20px;
   margin: 0px;
@@ -46,8 +41,6 @@ body {
 }
 
 #calc .edge-top {
-  height: 5px;
-  width: 244px;
   z-index: 99;
   position: absolute;
   background: #fff;
@@ -61,7 +54,6 @@ body {
   height: 20px;
   position: absolute;
   top: 5px;
-  width: 244px;
   z-index: 99;
 }
 
@@ -86,7 +78,7 @@ body {
 .equation .operand {
   color: #2c2c2c;
   float: right;
-  max-width: 80px;
+  /*max-width: 80px; Would like to keep this one so it doesn't clobber the operator. Overflow, wrap?*/
   text-align: right;
   overflow: hidden;
   height: 16px;
@@ -118,202 +110,33 @@ body {
 
 #calc #buttons {
   height: 225px;
-  max-width: 244px;
-  min-width: 244px;
+  width: 100%;
   position: absolute;
   bottom: 0px;
+  table-layout: fixed;
+  border-spacing: 0;
+  border-collapse: collapse;
+  color: #aaa;
 }
 
 .calc-button {
   height: 45px;
-  width: 61px;
-  float: left;
+  background-color: #333;
+  border: 1px solid #1d1d1d;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
 }
 
-.calc-button.AC {
-  background: url('img/1x/normal/52112_calculator_ac_btn.png');
-  background-size: 61px 45px;
+.calc-button:active {
+  background-color: #242424;
 }
 
-.calc-button.AC:active {
-  background: url('img/1x/pressed/52112_calculator_ac_btn.png');
-  background-size: 61px 45px;
+.equals {
+  background-color: #4f91fe;
 }
 
-.calc-button.plus-minus {
-  background: url('img/1x/normal/52112_calculator_positivenegative_btn.png');
-  background-size: 61px 45px;
+.symbol {
+  font-size: 150%;
 }
-
-.calc-button.plus-minus:active {
-  background: url('img/1x/pressed/52112_calculator_positivenegative_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.div {
-  background: url('img/1x/normal/52112_calculator_division_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.div:active {
-  background: url('img/1x/pressed/52112_calculator_division_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.mult {
-  background: url('img/1x/normal/52112_calculator_multiplication_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.mult:active {
-  background: url('img/1x/pressed/52112_calculator_multiplication_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.plus {
-  background: url('img/1x/normal/52112_calculator_addition_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.plus:active {
-  background: url('img/1x/pressed/52112_calculator_addition_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.minus {
-  background: url('img/1x/normal/52112_calculator_subtraction_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.minus:active {
-  background: url('img/1x/pressed/52112_calculator_subtraction_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.one {
-  background: url('img/1x/normal/52112_calculator_1_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.one:active {
-  background: url('img/1x/pressed/52112_calculator_1_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.two {
-  background: url('img/1x/normal/52112_calculator_2_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.two:active {
-  background: url('img/1x/pressed/52112_calculator_2_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.three {
-  background: url('img/1x/normal/52112_calculator_3_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.three:active {
-  background: url('img/1x/pressed/52112_calculator_3_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.four {
-  background: url('img/1x/normal/52112_calculator_4_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.four:active {
-  background: url('img/1x/pressed/52112_calculator_4_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.five {
-  background: url('img/1x/normal/52112_calculator_5_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.five:active {
-  background: url('img/1x/pressed/52112_calculator_5_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.six {
-  background: url('img/1x/normal/52112_calculator_6_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.six:active {
-  background: url('img/1x/pressed/52112_calculator_6_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.seven {
-  background: url('img/1x/normal/52112_calculator_7_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.seven:active {
-  background: url('img/1x/pressed/52112_calculator_7_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.eight {
-  background: url('img/1x/normal/52112_calculator_8_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.eight:active {
-  background: url('img/1x/pressed/52112_calculator_8_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.nine {
-  background: url('img/1x/normal/52112_calculator_9_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.nine:active {
-  background: url('img/1x/pressed/52112_calculator_9_btn.png');
-  background-size: 61px 45px;
-}
-
-.calc-button.equals {
-  background: url('img/1x/normal/52112_calculator_equals_btn.png') center no-repeat;
-  background-size: 61px 90px;
-  height: 90px;
-}
-
-.calc-button.equals:active {
-  background: url('img/1x/pressed/52112_calculator_equals_btn.png');
-  background-size: 61px 90px;
-}
-
-.calc-button.zero {
-  background: url('img/1x/normal/52112_calculator_0_btn.png') center no-repeat;
-  background-size: 122px 45px;
-  margin-top: -45px;
-  width: 122px;
-}
-
-.calc-button.zero:active {
-  background: url('img/1x/pressed/52112_calculator_0_btn.png') center no-repeat;
-  background-size: 122px 45px;
-}
-
-.calc-button.point {
-  background: url('img/1x/normal/52112_calculator_point_btn.png') center no-repeat;
-  background-size: 61px 45px;
-  height: 45px;
-  margin-top: -45px;
-  margin-left: 122px;
-}
-
-.calc-button.point:active {
-  background: url('img/1x/pressed/52112_calculator_point_btn.png') center no-repeat;
-  background-size: 61px 45px;
-}
-
 

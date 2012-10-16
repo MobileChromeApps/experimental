@@ -133,7 +133,7 @@ View.prototype.buttonClicked = function(clicked, result) {
 }
 
 View.prototype.BuildWidgets = function() {
-  this.AddButtons(this.calcElement);
+  this.AddButtons();
   this.AddDisplayEquation('', 0, '');
 }
 
@@ -163,40 +163,43 @@ View.prototype.AddButtons = function() {
   var row;
 
   row = this.AddRow();
-  this.AddButton(row, 'AC', 'AC');
-  this.AddButton(row, 'plus-minus', 'plus-minus');
-  this.AddButton(row, 'div', 'div');
-  this.AddButton(row, 'mult', 'mult');
+  this.AddButton(row, 'AC');
+  this.AddButton(row, '&plusmn;', { css: 'symbol' });
+  this.AddButton(row, '&divide;', { css: 'symbol' });
+  this.AddButton(row, '&times;', { css: 'symbol' });
 
   row = this.AddRow();
-  this.AddButton(row, 7, 'seven');
-  this.AddButton(row, 8, 'eight');
-  this.AddButton(row, 9, 'nine');
-  this.AddButton(row, 'minus', 'minus');
+  this.AddButton(row, '7');
+  this.AddButton(row, '8');
+  this.AddButton(row, '9');
+  this.AddButton(row, '&minus;', { css: 'symbol' });
 
   row = this.AddRow();
-  this.AddButton(row, 4, 'four');
-  this.AddButton(row, 5, 'five');
-  this.AddButton(row, 6, 'six');
-  this.AddButton(row, 'plus', 'plus');
+  this.AddButton(row, '4');
+  this.AddButton(row, '5');
+  this.AddButton(row, '6');
+  this.AddButton(row, '+', { css: 'symbol' });
 
   row = this.AddRow();
-  this.AddButton(row, 1, 'one');
-  this.AddButton(row, 2, 'two');
-  this.AddButton(row, 3, 'three');
-  this.AddButton(row, 'equals', 'equals');
+  this.AddButton(row, '1');
+  this.AddButton(row, '2');
+  this.AddButton(row, '3');
+  this.AddButton(row, '=', { rowspan: 2, css: 'equals symbol' });
 
   row = this.AddRow();
-  this.AddButton(row, 0, 'zero');
-  this.AddButton(row, 'point', 'point')
+  this.AddButton(row, '0', { colspan: 2 });
+  this.AddButton(row, '.', { css: 'symbol' })
 }
 
 View.prototype.AddRow = function() {
-  var row = $('<div/>');
+  var row = $('<tr/>');
   this.buttonsElement.append(row);
   return row;
 }
 
-View.prototype.AddButton = function(row, value, button_value) {
-  row.append('<div class="calc-button ' + button_value + '">' + '</div>');
+View.prototype.AddButton = function(row, value, options) {
+  var colspan = options && options.colspan ? ' colspan=' + options.colspan : '';
+  var rowspan = options && options.rowspan ? ' rowspan=' + options.rowspan : '';
+  var classes = options && options.css     ? ' ' + options.css : '';
+  row.append('<td class="calc-button' + classes + '"' + rowspan + colspan + '>' + value + '</td>');
 }
