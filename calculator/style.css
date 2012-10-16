@@ -33,11 +33,13 @@ body {
   letter-spacing: 1px;
   line-height: 20px;
   margin: 0px;
-  min-width: 204px;
+  padding: 0px;
   overflow: scroll;
-  padding: 20px;
   position: absolute;
-  top: 0px;
+  top: 20px;
+  bottom: 245px;
+  left: 20px;
+  right: 20px;
 }
 
 #calc .edge-top {
