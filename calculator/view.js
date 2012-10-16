@@ -1,23 +1,23 @@
 var operators = ['+', '-', '/', '*'];
 
-var values = { 'one'   : 1,
-               'two'   : 2,
-               'three' : 3,
-               'four'  : 4,
-               'five'  : 5,
-               'six'   : 6,
-               'seven' : 7,
-               'eight' : 8,
-               'nine'  : 9,
-               'zero'  : 0,
-               'plus'  : '+',
-               'minus' : '-',
-               'div'   : '/',
-               'mult'  : '*',
-               'equals': '=',
-               'point' : '.',
+var values = { '1'   : 1,
+               '2'   : 2,
+               '3' : 3,
+               '4'  : 4,
+               '5'  : 5,
+               '6'   : 6,
+               '7' : 7,
+               '8' : 8,
+               '9'  : 9,
+               '0'  : 0,
+               '+'  : '+',
+               '&minus;' : '-',
+               '&divide;'   : '/',
+               '&times;'  : '*',
+               '=': '=',
+               '.' : '.',
                'AC'    : 'AC',
-               'plus-minus' : '+ / -'
+               '&plusmn;' : '+ / -'
               }
 
 var keyboard = { 49 : 1,
@@ -49,14 +49,9 @@ function View(calcModel) {
   this.buttonsElement = $('#buttons');
   this.displayElement = $('#display');
   this.lastDisplayElement = null;
+  this.model = calcModel;
   this.BuildWidgets();
   var calc = this;
-
-  $('.calc-button').click(function() {
-    var clicked = values[$(this).attr('class').split(' ')[1]];
-    var result = calcModel.HandleButtonClick(clicked);
-    calc.buttonClicked(clicked, result);
-  });
 
   $(document).keydown(function(event) {
     var clicked = null;
@@ -201,5 +196,13 @@ View.prototype.AddButton = function(row, value, options) {
   var colspan = options && options.colspan ? ' colspan=' + options.colspan : '';
   var rowspan = options && options.rowspan ? ' rowspan=' + options.rowspan : '';
   var classes = options && options.css     ? ' ' + options.css : '';
-  row.append('<td class="calc-button' + classes + '"' + rowspan + colspan + '>' + value + '</td>');
+  var button = $('<td class="calc-button' + classes + '"' + rowspan + colspan + '>' + value + '</td>');
+  var self = this;
+  button.click(function() {
+      console.log('clicking ' + value);
+      var clicked = values[value];
+      var result = self.model.HandleButtonClick(clicked);
+      self.buttonClicked(clicked, result);
+  });
+  row.append(button);
 }
