@@ -13,6 +13,7 @@ This version of the calculator is changed to work nicely on mobile (and hopefull
 * I removed min/max Width/Height from main.js for testing on desktop by resizing the window, but that isn't necessary for mobile, which just ignores the size.
 * The use of images for the calculator buttons makes resizing them impossible. I replaced them with appropriately styled table cells. This was the most complex change I had to make.
     * Had to remove several pieces of CSS hardcoded with the size of the window. The fixed size of the calculator popup was absolutely baked deeply into this code.
+* The `overflow: scroll` was problematic because it requires a fixed height. I ended up using `position: absolute` for both the calculator display and the buttons, setting `top`, `bottom`, `left` and `right` instead of `padding`. Then the `overflow: scroll` started working.
 
 
 ## APIs
