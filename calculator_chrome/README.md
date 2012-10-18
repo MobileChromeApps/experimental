@@ -14,6 +14,7 @@ This version of the calculator is changed to work nicely on mobile (and hopefull
 * The use of images for the calculator buttons makes resizing them impossible. I replaced them with appropriately styled table cells. This was the most complex change I had to make.
     * Had to remove several pieces of CSS hardcoded with the size of the window. The fixed size of the calculator popup was absolutely baked deeply into this code.
 * The `overflow: scroll` was problematic because it requires a fixed height. I ended up using `position: absolute` for both the calculator display and the buttons, setting `top`, `bottom`, `left` and `right` instead of `padding`. Then the `overflow: scroll` started working.
+* I used the same trick as mobile-spec to have a cordova.js that adds a `<script>` tag to the document for either `cordova.android.js` or `cordova.ios.js` depending on `navigator.userAgent.indexOf('Android')`. A similar hack may prove necessary to add platform-specific CSS.
 
 
 ## APIs
