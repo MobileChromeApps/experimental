@@ -199,7 +199,6 @@ View.prototype.AddButton = function(row, value, options) {
   var button = $('<td class="calc-button' + classes + '"' + rowspan + colspan + '>' + value + '</td>');
   var self = this;
   button.click(function() {
-      console.log('clicking ' + value);
       var clicked = values[value];
       var result = self.model.HandleButtonClick(clicked);
       self.buttonClicked(clicked, result);
