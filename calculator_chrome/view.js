@@ -198,10 +198,29 @@ View.prototype.AddButton = function(row, value, options) {
   var classes = options && options.css     ? ' ' + options.css : '';
   var button = $('<td class="calc-button' + classes + '"' + rowspan + colspan + '>' + value + '</td>');
   var self = this;
-  button.click(function() {
+  function doClick() {
       var clicked = values[value];
       var result = self.model.HandleButtonClick(clicked);
       self.buttonClicked(clicked, result);
+  }
+
+  var tapping = false;
+  var touched = false;
+  button.click(function() {
+    if (!touched) {
+      doClick();
+    }
+    touched = false;
+  });
+
+  button.bind('touchstart', function() { tapping = true; });
+  button.bind('touchmove',  function() { tapping = false; });
+  button.bind('touchend',   function() {
+    if (tapping) {
+      tapping = false;
+      touched = true;
+      doClick();
+    }
   });
   row.append(button);
 }
