@@ -17,6 +17,9 @@ This version of the calculator is changed to work nicely on mobile (and hopefull
 * I used the same trick as mobile-spec to have a cordova.js that adds a `<script>` tag to the document for either `cordova.android.js` or `cordova.ios.js` depending on `navigator.userAgent.indexOf('Android')`. A similar hack may prove necessary to add platform-specific CSS.
 * `<iframe>` doesn't work on Android 3 and later unless you set `<preference name="useBrowserHistory" value="true" />` in `config.xml`. The iframe takes over the main page and you get a blank white page.
 * Fast clicks. This needs to be turned into a library and/or done by default. I'm not sure if we can do it automatically in general, since it depends on how the Chrome app is capturing clicks. Things work without fast clicks, but they're sluggish.
+* Locking to portrait.
+    * Android: Add `android:screenOrientation="portrait"` to `<activity>` in AndroidManifest.xml.
+    * iOS: Seems to be the default. At least, it was already set as "portrait only" for me. Setting is found on the Summary screen of the app target in Xcode.
 
 
 ### Improvements
@@ -24,7 +27,6 @@ This version of the calculator is changed to work nicely on mobile (and hopefull
 Some things that could be done to the new version to bring it closer to reproducing the old version.
 
 * CSS gradients on the buttons, so they look as textured and nice as those on the original images.
-* Locking to portrait.
 
 
 ## APIs
