@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<title>Weather</title>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="lib/tipTipv13/tipTip.css" />
+		<link rel="stylesheet" type="text/css" href="style.css" />
+
+ 		<script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
+ 		<script type="text/javascript" src="lib/tipTipv13/jquery.tipTip.minified.js"></script>
+ 		<script type="text/javascript" src="weather.js"></script>
+	</head>
+
+	<body>
+		<div class="close"></div>
+		<div id="info-text" class="hidden">
+			<div class="source">
+				Powered by <a href="http://www.worldweatheronline.com/"
+											title="Free local weather content provider"
+											target="blank">World Weather Online</a>
+			</div>
+			<div class="new">
+				ADD CITY<br>
+				<input type="text" id="new-city" /><br>
+				<div class="error-message hidden"></div>
+				<div class="button blue add">ADD</div>
+				<div class="button cancel">CANCEL</div>
+			</div>
+			<input type="radio" name="temp-type" value="F" class="F"> FAHRENHEIT<br>
+			<input type="radio" name="temp-type" value="C" class="C"> CELSIUS
+			<div class="places-list"></div>
+		</div>
+		<div id="weather">
+		</div>
+		<div id="places">
+			<div id="prev"></div>
+			<div id="next"></div>
+		</div>
+		<div id="info"></div>
+	</body>
+</html>
