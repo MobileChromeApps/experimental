@@ -3,6 +3,7 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  **/
+document.ontouchmove = function(e) { e.preventDefault(); }
 
 var temp = 'F';
 var places = {};
@@ -90,11 +91,7 @@ $(document).ready(function() {
 		if (!temp) temp = 'F';
 		$('input[name="temp-type"].' + temp).attr('checked', true);
 		setup();
-  });
-
-  $('.close').click(function() {
-    window.close();
-  });
+    });
 
 	// Tracks to changes to the temperature
 	// format. Stores the setting for the user
@@ -170,53 +167,26 @@ $(document).ready(function() {
 		}
 	});
 
-	// shortcut handler for tracking the
-	// return key and calling the click handler
-	$('#new-city').keyup(function(event) {
-		if (event.which == 13)
-			$('.new .add').click();
-	});
-
-	// shortcut handler for switching to next city
-	$(document).keyup(function(event) {
-		if (event.which == 39)
-			var index = locations.indexOf(current_place);
-			if (index < locations.length - 1) {
-				$('.' + current_place).removeClass('selected');
-				current_place = locations[index + 1];
-				$('.' + current_place).addClass('selected');
-				setDots();
-			}
-	});
-
-	$('#places #next.shown').live('click', function() {
+	//$('#places #next.shown').live('click', function() {
+    $(document).bind('swipeleft', function() {
+        var swipeamount = 1;
 		var index = locations.indexOf(current_place);
 		$('.' + current_place).removeClass('selected');
-		if (index + 4 < locations.length)
-			current_place = locations[index + 4];
+		if (index + swipeamount < locations.length)
+			current_place = locations[index + swipeamount];
 		else
 			current_place = locations[locations.length - 1];
 		$('.' + current_place).addClass('selected');
 		setDots();
 	});
 
-	// shortcut handler for switching to previous city
-	$(document).keyup(function(event) {
-		if (event.which == 37)
-			var index = locations.indexOf(current_place);
-			if (index > 0) {
-				$('.' + current_place).removeClass('selected');
-				current_place = locations[index - 1];
-				$('.' + current_place).addClass('selected');
-				setDots();
-			}
-	});
-
-	$('#places #prev.shown').live('click', function() {
+	//$('#places #prev.shown').live('click', function() {
+    $(document).bind('swiperight', function() {
+        var swipeamount = 1;
 		var index = locations.indexOf(current_place);
 		$('.' + current_place).removeClass('selected');
-		if (index - 4 >= 0)
-			current_place = locations[index - 4];
+		if (index - swipeamount >= 0)
+			current_place = locations[index - swipeamount];
 		else
 			current_place = locations[0];
 		$('.' + current_place).addClass('selected');
@@ -258,8 +228,7 @@ $(document).ready(function() {
  * @see http://developer.chrome.com/trunk/apps/manifest.html#permissions
  */
 function setup() {
-	navigator.geolocation.getCurrentPosition(getCurrentPosSuccessFunction,
-																					getCurrentPosErrorFunction);
+	navigator.geolocation.getCurrentPosition(getCurrentPosSuccessFunction, getCurrentPosErrorFunction);
 }
 
 /**
@@ -395,6 +364,13 @@ function createDisplay(locations, add) {
 					$('.new .error-message').text('Could not find weather for ' + location);
 					$('.new .error-message').removeClass('hidden');
 				}
+
+                Array.prototype.forEach.call(document.querySelectorAll('#places .place'), function(e,i) {
+                    e.onclick = function(){};
+                });
+                Array.prototype.forEach.call(document.querySelectorAll('.place-list .delete'), function(e,i) {
+                    e.onclick = function(){};
+                });
 			},
 			'json'
 		);
@@ -415,6 +391,8 @@ function setDots() {
 		$('#places #next').addClass('disabled');
 		$('.place').removeClass('shown');
 		var index = locations.indexOf(current_place);
+		// TODO: implement pagination
+		/*
 		if (index >= 4)
 			$('#places #prev').addClass('shown').removeClass('disabled');
 		else
@@ -430,7 +408,9 @@ function setDots() {
 		}
 		for (var l = first; l < first + 4; l++)
 			$('#places .place.' + locations[l]).addClass('shown');
-
+		*/
+		for (var l = 0; l < locations.length; l++)
+			$('#places .place.' + locations[l]).addClass('shown');
 	}
 }
 
