@@ -126,10 +126,10 @@ $(document).ready(function() {
     //
     // @see http://developer.chrome.com/trunk/apps/storage.html
     chrome.storage.sync.get(function(items) {
-        for (var place_class in items['places']) {
-            places[place_class] = items['places'][place_class];
+        for (var place_class in items.places) {
+            places[place_class] = items.places[place_class];
         }
-        temp = items['temp'];
+        temp = items.temp;
         if (!temp) temp = 'F';
         $('input[name="temp-type"].' + temp).attr('checked', true);
         setup();
@@ -198,9 +198,10 @@ $(document).ready(function() {
     });
     
     $('#new-city').keyup(function(e) {
-        console.log(event.which);
-        if (event.which == 13)
+        if (event.which == 13) // enter
             $('.new .add').click();
+        if (event.which == 27) // esc
+            $('.new .cancel').click();
     });
     
     // cancels the city addition
@@ -272,7 +273,8 @@ $(document).ready(function() {
         if (!settings) {
             e.preventDefault();
         }
-    }
+    };
+
     document.addEventListener("backbutton" , function(e) {
         if (settings) {
             hideSettings();
@@ -311,46 +313,38 @@ function refresh() {
  * @see http://www.w3.org/TR/geolocation-API/#position_interface
  */
 function getCurrentPosSuccessFunction(position) {
+    var lat = position.coords.latitude;
+    var lng = position.coords.longitude;
+    var url = base_city_url + lat + ',' + lng;
 
-  var lat = position.coords.latitude;
-  var lng = position.coords.longitude;
-  var url = base_city_url + lat + ',' + lng;
+    $.get(url, function(data) {
+        for (var i = 0; i < data.results.length; i++) {
+            var component_types = data.results[i].types;
+            if ((component_types.indexOf('street_address') != -1) || (component_types.indexOf('locality') != -1)) {
 
-  $.get(url,
-        function(data) {
+                var address_components = data.results[i].address_components;
+                var city = '';
+                var country = '';
 
-            for (var i = 0; i < data['results'].length; i++) {
-
-                var component_types = data['results'][i]['types'];
-
-                if ( (component_types.indexOf('street_address') != -1) ||
-                        (component_types.indexOf('locality') != -1) ) {
-
-                    var address_components = data['results'][i]['address_components'];
-                    var city = '';
-                    var country = '';
-
-                    for (var j = 0; j < address_components.length; j++) {
-                        if (address_components[j]['types'].indexOf('locality') != -1) {
-                            city = address_components[j]['long_name'];
-                        }
-                        if (address_components[j]['types'].indexOf('country') != -1) {
-                            country = address_components[j]['short_name'];
-                        }
+                for (var j = 0; j < address_components.length; j++) {
+                    if (address_components[j].types.indexOf('locality') != -1) {
+                        city = address_components[j].long_name;
                     }
-
-                    var location = city + ', ' + country;
-                    current_place = city.toLowerCase().split(' ').join('-');
-                    if (!(current_place in places)) {
-                        places[current_place] = location;
+                    if (address_components[j].types.indexOf('country') != -1) {
+                        country = address_components[j].short_name;
                     }
-                    break;
                 }
+
+                var location = city + ', ' + country;
+                current_place = city.toLowerCase().split(' ').join('-');
+                if (!(current_place in places)) {
+                    places[current_place] = location;
+                }
+                break;
             }
-            createDisplay(places);
-        },
-        'json'
-    );
+        }
+        createDisplay(places);
+    }, 'json');
 }
 
 /**
@@ -381,50 +375,40 @@ function getCurrentPosErrorFunction(error) {
  * @see http://developer.chrome.com/trunk/apps/storage.html
  */
 function createDisplay(locations, add) {
+    var handleGetLocationData = function(data) {
+        if (!data.data.error) {
+            var current_condition = data.data.current_condition[0];
+            var weather = data.data.weather;
+            var city = data.data.request[0].query;
+            var location_class = city.toLowerCase().split(', ')[0].split(' ').join('-');
+            addLocationDisplay(city, current_condition, weather);
+
+            if (add) {
+                current_place = location_class;
+                places[location_class] = city;
+                chrome.storage.sync.set({ 'places': places });
+                $('settings').click();
+                selectCity(current_place);
+                hideInputError();
+            }
+        } else if (add) {
+            showInputError(location);
+        }
+
+        // What follows is a workaround for broken jquery "live" onclick functionality on mobile.
+        // Need to 'poke' elements so they are clickable.
+        Array.prototype.forEach.call(document.querySelectorAll('#places .place'), function(e,i) {
+            e.onclick = function(){};
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('.place-list .delete'), function(e,i) {
+            e.onclick = function(){};
+        });
+    };
 
     for (var location_class in locations) {
-
         var location = locations[location_class];
         var url = encodeURI(base_weather_url + location);
-
-        $.get(url,
-
-            function(data) {
-
-                // check for errors loading the data for that city
-                if (!data['data']['error']) {
-
-                    var current_condition = data['data']['current_condition'][0];
-                    var weather = data['data']['weather'];
-                    var city = data['data']['request'][0]['query'];
-                    location_class = city.toLowerCase().split(', ')[0].split(' ').join('-');
-
-                    addLocationDisplay(city, current_condition, weather);
-
-                    // if this is to be added
-                    // to the stored locations do that now
-                    if (add) {
-                        current_place = location_class;
-                        places[location_class] = city;
-                        chrome.storage.sync.set({ 'places': places });
-                        $('settings').click();
-                        selectCity(current_place);
-                        hideInputError();
-                    }
-                } else if (add) {
-                    // complain if they tried to add a non-existent city
-                    showInputError(location);
-                }
-
-                Array.prototype.forEach.call(document.querySelectorAll('#places .place'), function(e,i) {
-                    e.onclick = function(){};
-                });
-                Array.prototype.forEach.call(document.querySelectorAll('.place-list .delete'), function(e,i) {
-                    e.onclick = function(){};
-                });
-            },
-            'json'
-        );
+        $.get(url, handleGetLocationData, 'json');
     }
 }
 
@@ -446,7 +430,7 @@ function setDots() {
         for (var l = first; l < first + 4; l++)
             $('#places .place.' + locations[l]).addClass('shown');
 
-        if (first == 0)
+        if (first === 0)
             $('#places #prev').removeClass('shown').addClass('disabled');
         else
             $('#places #prev').addClass('shown').removeClass('disabled');
@@ -479,7 +463,7 @@ function addLocationDisplay(location, current_condition, weather) {
     }
 
     // create the markup
-    var description = ' ' + condition_codes[current_condition['weatherCode']];
+    var description = ' ' + condition_codes[current_condition.weatherCode];
     var location_html = '<div class="location ' + city_class + description + selected + '">' +
                                             '</div>';
     var city = location.split(', ')[0];
@@ -529,8 +513,8 @@ function cityDisplay(location) {
 function currentDisplay(current_condition) {
 
     var current_temp = current_condition['temp_' + temp];
-    var current_description = current_condition['weatherDesc'][0]['value'];
-    var current_icon = condition_codes[current_condition['weatherCode']];
+    var current_description = current_condition.weatherDesc[0].value;
+    var current_icon = condition_codes[current_condition.weatherCode];
     var html = '<div class="current">' +
                                 '<div class="current-temp">' + current_temp + '</div>' +
                                 '<div class="current-icon ' + current_icon + '"' +
@@ -549,9 +533,9 @@ function currentDisplay(current_condition) {
  */
 function dayDisplay(weather, i) {
     var day_data = weather[i];
-    var day_condition = condition_codes[day_data['weatherCode']];
-    var day_description = day_data['weatherDesc'][0]['value'];
-    var date = day_data['date'].split('-');
+    var day_condition = condition_codes[day_data.weatherCode];
+    var day_description = day_data.weatherDesc[0].value;
+    var date = day_data.date.split('-');
     var day = days[((new Date().getDay() + i) % 7)];
     var html = '<div class="day"' + i + '">' +
                                 '<div class="date">' + day + '</div>' +
