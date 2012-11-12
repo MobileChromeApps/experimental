@@ -1,4 +1,4 @@
-/*! Cordova for Chrome - v0.1.0 - 2012-11-01
+/*! Cordova for Chrome - v0.1.0 - 2012-11-12
 * http://github.com/MobileChromeApps/
 * Copyright (c) 2012 Google Inc.; Licensed MIT */
 
@@ -10,14 +10,52 @@
     return;
   }
 
-  var __modules = {};
-  function define(name, fn) {
-    if (__modules[name]) {
-      console.log('WARNING - duplicate definition of module: ' + name);
-      return;
+  var require, define;
+  var modules = {};
+  (function() {
+    define = function define(name, fn) {
+      if (modules[name]) {
+        console.log('WARNING - duplicate definition of module: ' + name);
+        return;
+      }
+      modules[name] = fn;
     }
-    __modules[name] = fn;
-  }
+
+    var resolving = {};
+    require = function require(target) {
+      // Look up the module.
+      var mod = modules[target];
+      if (!mod) {
+        console.error('No such module: ' + target);
+        return;
+      }
+      if (resolving[target]) {
+        console.error('Circular require(): ' + target + ' included twice.');
+        return;
+      }
+
+      if (typeof mod == 'function') {
+        // Prevent circular requires.
+        resolving[target] = true;
+
+        // This layer of indirection is present so that the module code can change exports to point to something new, like a function.
+        var module = {};
+        module.exports = {};
+        mod(require, module);
+        modules[target] = module;
+
+        // No longer resolving this module.
+        delete resolving[target];
+
+        return module.exports;
+        // Each module is a singleton run only once, and this allows static data.
+      } else if (typeof mod == 'object') {
+        return mod.exports;
+      } else {
+        console.error('unsupported module type: ' + typeof mod);
+      }
+    };
+  })();
 
   function unsupportedApi(name) {
     return function() {
@@ -28,22 +66,23 @@
 
 // chrome.app.runtime
 
-define('chrome.app.runtime', function(require, module, chrome) {
-  chrome.app.runtime = {};
-
+define('chrome.app.runtime', function(require, module) {
   var events = require('helpers.events');
-  chrome.app.runtime.onLaunched = {};
-  chrome.app.runtime.onLaunched.addListener = events.addListener('onLaunched');
-  chrome.app.runtime.onLaunched.fire = events.fire('onLaunched');
+  var exports = module.exports;
+  exports.onLaunched = {};
+  exports.onLaunched.addListener = events.addListener('onLaunched');
+  exports.onLaunched.fire = events.fire('onLaunched');
 });
 
 
-define('chrome.app.window', function(require, module, chrome) {
-  var mobile = require('chrome.mobile');
-  var common = require('chrome.common');
+define('chrome.app.window', function(require, module) {
+  var events = require('helpers.events');
+  var mobile = require('chrome.mobile.impl');
+  var exports = module.exports;
 
   // The AppWindow created by chrome.app.window.create.
   var createdAppWindow = null;
+  var dummyNode = document.createElement('a');
 
   function AppWindow() {
     this.contentWindow = mobile.fgWindow;
@@ -58,11 +97,68 @@ define('chrome.app.window', function(require, module, chrome) {
     focus: unsupportedApi('AppWindow.focus'),
     resizeTo: unsupportedApi('AppWindow.resizeTo'),
     maximize: unsupportedApi('AppWindow.maximize'),
-    close: unsupportedApi('AppWindow.close')
+    close: unsupportedApi('AppWindow.close'),
+    onClosed: { addListener: events.addListener('onClosed') }
   };
 
-  chrome.app.window = {};
-  chrome.app.window.create = function(filePath, options, callback) {
+  function copyAttributes(srcNode, destNode) {
+    var attrs = srcNode.attributes;
+    for (var i = 0, attr; attr = attrs[i]; ++i) {
+      destNode.setAttribute(attr.name, attr.value);
+    }
+  }
+
+  function applyAttributes(attrText, destNode) {
+    dummyNode.innerHTML = '<a ' + attrText + '>';
+    copyAttributes(dummyNode.firstChild, destNode);
+  }
+
+  function evalScripts(rootNode) {
+    var scripts = rootNode.getElementsByTagName('script');
+    var doc = rootNode.ownerDocument;
+    for (var i = 0, script; script = scripts[i]; ++i) {
+      var replacement = doc.createElement('script');
+      copyAttributes(script, replacement);
+      // Don't bother with copying the innerHTML since chrome apps do not
+      // support inline scripts.
+      script.parentNode.replaceChild(replacement, script);
+    }
+  }
+
+  function rewritePage(pageContent) {
+    var fgBody = mobile.fgWindow.document.body;
+    var fgHead = fgBody.previousElementSibling;
+
+    var startIndex = pageContent.search(/<html([\s\S]*?)>/i);
+    if (startIndex == -1) {
+      mobile.eventIframe.insertSiblingHTML(pageContent);
+    } else {
+      startIndex = startIndex + RegExp.lastMatch.length;
+      // Copy over the attributes of the <html> tag.
+      applyAttributes(RegExp.lastParen, fgBody.parentNode);
+
+      var endIndex = pageContent.search(/<\/head\s*>/i);
+      var headHtml = pageContent.slice(startIndex, endIndex);
+      pageContent = pageContent.slice(endIndex + RegExp.lastMatch.length);
+
+      // Remove the <head> tag, and copy over its attributes.
+      headHtml = headHtml.replace(/<head\b([\s\S]*?)>/i, '');
+      applyAttributes(RegExp.lastParen, fgHead);
+
+      headHtml = '<link rel="stylesheet" href="chromeappstyles.css">\n' + headHtml;
+      fgHead.innerHTML = headHtml;
+      evalScripts(fgHead);
+
+      // Copy the <body> tag attributes.
+      pageContent.search(/<body([\s\S]*?)>/i);
+      applyAttributes(RegExp.lastParen, fgBody);
+      // Don't bother removing the <body>, </body>, </html>. The browser's sanitizer removes them for us.
+      mobile.eventIframe.insertAdjacentHTML('afterend', pageContent);
+      evalScripts(fgBody);
+    }
+  }
+
+  exports.create = function(filePath, options, callback) {
     if (createdAppWindow) {
       console.log('ERROR - chrome.app.window.create called multiple times. This is unsupported.');
       return;
@@ -70,92 +166,56 @@ define('chrome.app.window', function(require, module, chrome) {
     createdAppWindow = new AppWindow();
     var xhr = new XMLHttpRequest();
     xhr.open('GET', filePath, true);
-    var topDoc = mobile.fgWindow.document;
     xhr.onreadystatechange = function() {
       if (xhr.readyState == 4) {
-        topDoc.open();
-        var pageContent = xhr.responseText || 'Page load failed.';
-        var headIndex = pageContent.indexOf('<head>');
-        if (headIndex != -1) {
-          common.windowCreateCallback = callback;
-          var endIndex = headIndex + '<head>'.length;
-          topDoc.write(pageContent.slice(0, endIndex));
-          topDoc.write('<link rel="stylesheet" type="text/css" href="chromeappstyles.css">');
-          // Set up the callback to be called before the page contents loads.
-          if (callback) {
-            common.createWindowCallback = callback;
-            topDoc.write('<script>chrome.mobile.impl.createWindowHook()</script>');
-          }
-          topDoc.write(pageContent.slice(endIndex));
-        } else {
-          topDoc.write(pageContent);
-          // Callback is called even when the URL is invalid.
-          if (callback) {
-            callback(createdAppWindow);
-          }
+        // Call the callback before the page contents loads.
+        if (callback) {
+          callback(createdAppWindow);
         }
-        topDoc.close();
+        var pageContent = xhr.responseText || 'Page load failed.';
+        rewritePage(pageContent);
+        cordova.fireWindowEvent('DOMContentReady');
+        cordova.fireWindowEvent('load');
       }
     };
     xhr.send();
   };
 
-  chrome.app.window.current = function() {
+  exports.current = function() {
     return window == mobile.fgWindow ? createdAppWindow : null;
   };
 });
 
-define('chrome.app', function(require, module, chrome) {
-  chrome.app = {};
-  require('chrome.app.runtime');
-  require('chrome.app.window');
-});
+define('chrome.mobile.impl', function(require, module) {
+  var exports = module.exports;
 
-define('chrome.common', function(require, module) {
-  module.exports.windowCreateCallback = null;
-});
-
-define('chrome.mobile', function(require, module, chrome) {
-  var common = require('chrome.common');
-
-  chrome.mobile = {};
-  chrome.mobile.impl = {};
-  chrome.mobile.impl.init = function(_fgWindow, _bgWindow) {
-    module.exports.fgWindow = _fgWindow;
-    module.exports.bgWindow = _bgWindow;
-    module.exports.bgWindow.chrome = chrome;
-  };
-
-  chrome.mobile.impl.createWindowHook = function() {
-    common.windowCreateCallback();
-    common.windowCreateCallback = null;
+  exports.init = function(fgWindow, eventIframe) {
+    exports.fgWindow = fgWindow;
+    exports.bgWindow = eventIframe.contentWindow;
+    exports.eventIframe = eventIframe;
+    exports.bgWindow.chrome = window.chrome;
   };
 });
 
-define('chrome.runtime', function(require, module, chrome) {
-  if (!chrome.runtime) {
-    chrome.runtime = {};
-  }
-
+define('chrome.runtime', function(require, module) {
   var events = require('helpers.events');
-  chrome.runtime.onSuspend = {};
+  var exports = module.exports;
+  exports.onSuspend = {};
 
-  chrome.runtime.onSuspend.fire = events.fire('onSuspend');
+  exports.onSuspend.fire = events.fire('onSuspend');
 
   // Uses a trampoline to bind the Cordova pause event on the first call.
-  chrome.runtime.onSuspend.addListener = function(f) {
-    window.document.addEventListener('pause', chrome.runtime.onSuspend.fire, false);
+  exports.onSuspend.addListener = function(f) {
+    window.document.addEventListener('pause', exports.onSuspend.fire, false);
     var h = events.addListener('onSuspend');
     console.log('sub-handler type: ' + typeof h);
-    chrome.runtime.onSuspend.addListener = h;
-    chrome.runtime.onSuspend.addListener(f);
+    exports.onSuspend.addListener = h;
+    exports.onSuspend.addListener(f);
   };
 });
 
 
-define('chrome.storage', function(require, module, chrome) {
-  chrome.storage = {};
-
+define('chrome.storage', function(require, module) {
   function StorageArea() {
   }
 
@@ -199,7 +259,9 @@ define('chrome.storage', function(require, module, chrome) {
         items[localStorage.key(i)] = null;
       }
     } else if (typeof items === 'string') {
-      items = { items: null };
+      var tmp = items;
+      items = {};
+      items[tmp] = null;
     } else if (Object.prototype.toString.call(items) === '[object Array]') {
         var newItems = {};
         items.forEach(function(e) {
@@ -226,20 +288,25 @@ define('chrome.storage', function(require, module, chrome) {
   StorageChange.prototype = {
   };
 
-  chrome.storage.local = new StorageArea();
-  chrome.storage.local.QUOTA_BYTES = 5242880;
+  var local = new StorageArea();
+  local.QUOTA_BYTES = 5242880;
 
-  chrome.storage.sync = new StorageArea();
-  chrome.storage.sync.MAX_ITEMS = 512;
-  chrome.storage.sync.MAX_WRITE_OPERATIONS_PER_HOUR = 1000;
-  chrome.storage.sync.QUOTA_BYTES_PER_ITEM = 4096;
-  chrome.storage.sync.MAX_SUSTAINED_WRITE_OPERATIONS_PER_MINUTE = 10;
-  chrome.storage.sync.QUOTA_BYTES = 102400;
+  var sync = new StorageArea();
+  sync.MAX_ITEMS = 512;
+  sync.MAX_WRITE_OPERATIONS_PER_HOUR = 1000;
+  sync.QUOTA_BYTES_PER_ITEM = 4096;
+  sync.MAX_SUSTAINED_WRITE_OPERATIONS_PER_MINUTE = 10;
+  sync.QUOTA_BYTES = 102400;
+
+
+  var exports = module.exports;
+  exports.local = local;
+  exports.sync = sync;
 
   var events = require('helpers.events');
-  chrome.storage.onChanged = {}; // TODO(mmocny)
-  chrome.storage.onChanged.addListener = events.addListener('onChanged');
-  chrome.storage.onChanged.fire = events.fire('onChanged');
+  exports.onChanged = {}; // TODO(mmocny)
+  exports.onChanged.addListener = events.addListener('onChanged');
+  exports.onChanged.fire = events.fire('onChanged');
 });
 
 define('helpers.events', function(require, module) {
@@ -265,60 +332,29 @@ define('helpers.events', function(require, module) {
 });
 
 
-// Main module: Master set-up of Chrome APIs.
-
-define('chrome', function(require) {
-  // API modules export functions that expect this value as an argument and populate it with their part of the API.
-  require('chrome.app');
-  require('chrome.runtime');
-  require('chrome.storage');
-});
-
 // Concluding code for the APIs, with the implementation of require and inclusion of main.
-
-var require = (function() {
-  var resolving = {};
-
-  return function require(target) {
-    // Look up the module.
-    var mod = __modules[target];
-    if (!mod) {
-      console.error('No such module: ' + target);
-      return;
-    }
-    if (resolving[target]) {
-      console.error('Circular require(): ' + target + ' included twice.');
-      return;
-    }
-
-    if (typeof mod == 'function') {
-      // Prevent circular requires.
-      resolving[target] = true;
-
-      // This layer of indirection is present so that the module code can change exports to point to something new, like a function.
-      var module = {};
-      module.exports = {};
-      mod(require, module, window.chrome);
-      __modules[target] = module;
-
-      // No longer resolving this module.
-      delete resolving[target];
-
-      return module.exports;
-      // Each module is a singleton run only once, and this allows static data.
-      // Modules are passed an object they should treat as being the "chrome" object.
-      // Currently this is literally window.chrome, but we can change that in future if necessary.
-    } else if (typeof mod == 'object') {
-      return mod.exports;
-    } else {
-      console.error('unsupported module type: ' + typeof mod);
-    }
-  };
-})();
-
 // Load the module 'chrome' to kick things off.
-window.chrome = {};
-require('chrome');
+
+  function exportSymbol(name, object) {
+    var parts = name.split('.');
+    var cur = window;
+    for (var i = 0, part; part = parts[i++];) {
+      if (i == parts.length) {
+        cur[part] = object;
+      } else if (cur[part]) {
+        cur = cur[part];
+      } else {
+        cur = cur[part] = {};
+      }
+    }
+  }
+  // Create the root symbol. This will clobber Chrome's native symbol if applicable.
+  chrome = {};
+  for (var key in modules) {
+    if (key.indexOf('chrome.') == 0) {
+      exportSymbol(key, require(key));
+    }
+  }
 
 // Close the wrapping function and call it.
 })();
