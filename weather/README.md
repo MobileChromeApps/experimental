@@ -1,10 +1,17 @@
 ## Implementation steps
-* Setup project using templates
-* remove chrome.storage.sync
-* remove keyboard shortcuts
+* Create new project shell
+ * cordova ios/android create scripts
+ * Copy weather app into www folder
+ * and copy in mobile chrome app template files
+* Attempt first launch of app unchanged.. see blank page
+* Start hacking on js to get a minimal first version
+ * remove references chrome.storage
+  * adding hacks and fakery where needed
+ * remove keyboard shortcuts, close button, and anything desktop specific
 * Whitelist all urls
-* remove the close icon
-* increase click target size of settings
+* Woot, something works!
+* Touch support not working, add that.
+ * modify css and js to increase click target sizes (settings, buttons on bottom)
 * try to get city switching to work -- seems buggy even on desktop (prev/next not working)
  * odd bug with query live() onclick event -- workaround: just add an empty dumb click target after adding a new location!  very odd, not sure if web view or jQuery issue
 * Implement chrome.storage.sync
