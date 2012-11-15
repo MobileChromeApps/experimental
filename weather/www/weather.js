@@ -4,15 +4,16 @@
  * found in the LICENSE file.
  **/
 
-var temp = 'F';
-var places = {};
-var locations = [];
-var current_place = '';
-var base_weather_url = 'http://free.worldweatheronline.com/feed/weather.ashx?format=json&num_of_days=5&key=78b33b52eb213218120708&q=';
-var base_city_url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&latlng=';
-var settings = false;
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+// consts
 
-var days = {
+const num_buttons_at_bottom = 4;
+const base_weather_url = 'http://free.worldweatheronline.com/feed/weather.ashx?format=json&num_of_days=5&key=78b33b52eb213218120708&q=';
+const base_city_url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&latlng=';
+
+const days = {
     0 : 'Sunday',
     1 : 'Monday',
     2 : 'Tuesday',
@@ -22,78 +23,179 @@ var days = {
     6 : 'Saturday'
 };
 
-var condition_codes = {
-    395 : 'snow',
-    392 : 'light-snow',
-    389 : 'rain',
-    386 : 'scattered-light-rain',
-    377 : 'hail',
-    374 : 'hail',
-    371 : 'snow',
-    368 : 'light-snow',
-    365 : 'rain-snow',
-    362 : 'rain-snow',
-    359 : 'rain',
-    356 : 'rain',
-    353 : 'light-rain',
-    350 : 'hail',
-    338 : 'snow',
-    335 : 'scattered-snow',
-    332 : 'snow',
-    329 : 'scattered-snow',
-    326 : 'light-snow',
-    323 : 'light-snow',
-    320 : 'rain-snow',
-    317 : 'rain-snow',
-    314 : 'hail',
-    311 : 'rain',
-    308 : 'rain',
-    305 : 'rain',
-    302 : 'rain',
-    299 : 'light-rain',
-    296 : 'light-rain',
-    293 : 'scattered-light-rain',
-    284 : 'rain-snow',
-    281 : 'rain-snow',
-    266 : 'light-rain',
-    263 : 'scattered-light-rain',
-    260 : 'cloudy',
-    248 : 'cloudy',
-    230 : 'snow',
-    227 : 'snow',
-    200 : 'tstorm',
-    185 : 'rain-snow',
-    182 : 'rain-snow',
+const condition_codes = {
     113 : 'sunny',
     116 : 'partly-cloudy',
     119 : 'cloudy',
     122 : 'cloudy',
     143 : 'mostly-sunny',
     176 : 'scattered-light-rain',
-    179 : 'light-snow'
+    179 : 'light-snow',
+    182 : 'rain-snow',
+    185 : 'rain-snow',
+    200 : 'tstorm',
+    227 : 'snow',
+    230 : 'snow',
+    248 : 'cloudy',
+    260 : 'cloudy',
+    263 : 'scattered-light-rain',
+    266 : 'light-rain',
+    281 : 'rain-snow',
+    284 : 'rain-snow',
+    293 : 'scattered-light-rain',
+    296 : 'light-rain',
+    299 : 'light-rain',
+    302 : 'rain',
+    305 : 'rain',
+    308 : 'rain',
+    311 : 'rain',
+    314 : 'hail',
+    317 : 'rain-snow',
+    320 : 'rain-snow',
+    323 : 'light-snow',
+    326 : 'light-snow',
+    329 : 'scattered-snow',
+    332 : 'snow',
+    335 : 'scattered-snow',
+    338 : 'snow',
+    350 : 'hail',
+    353 : 'light-rain',
+    356 : 'rain',
+    359 : 'rain',
+    362 : 'rain-snow',
+    365 : 'rain-snow',
+    368 : 'light-snow',
+    371 : 'snow',
+    374 : 'hail',
+    377 : 'hail',
+    386 : 'scattered-light-rain',
+    389 : 'rain',
+    392 : 'light-snow',
+    395 : 'snow',
 };
 
-function selectCity(city_class) {
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+// "model"
+
+function City(name, searchterm, date) {
+    this.name = name;
+    this.searchterm = searchterm;
+    this.date = date;
+}
+
+function Cities() {
+    this.cities = [];
+    this.version = Cities.CurrentVersion;
+}
+
+Cities.prototype.CurrentVersion = 2;
+
+Cities.prototype.add = function(city) {
+    this.cities.push(city);
+}
+
+Cities.prototype.remove = function(city) {
+    this.cities.splice(this.cities.indexOf(city), 1);
+}
+
+Cities.prototype.length = function() {
+    return this.cities.length;
+}
+
+Cities.prototype.findByKey = function(key, value) {
+    for (var i = 0; i < this.cities.length; ++i) {
+        var city = this.cities[i];
+        if (city[key] === value) {
+            return city;
+        }
+    }
+    return null;
+}
+
+Cities.prototype.findByName = function(value) {
+    return this.findByKey("name", value);
+}
+
+Cities.prototype.sortedByKey = function(key) {
+    return this.cities.slice(0).sort(function(a,b){
+        var ret = (typeof a[key] === 'string') ? a[key].localeCompare(b[key]) : a[key] - b[key];
+        //console.log([a, b, key, a[key], b[key], ret]);
+        return ret;
+    });
+}
+
+Cities.prototype.asArray = function(key) {
+    return this.cities;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+// globals
+
+var temp = 'F';
+var cities = null;
+var current_city = null; // TODO: remove this
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+// helpers
+
+function sizeOf(dictionary) {
+    var count = 0;
+    for (var key in dictionary) {
+        if (dictionary.hasOwnProperty(key)) count++;
+    }
+    return count;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+// "controller"
+
+function selectCity(city) {
     $('.location').removeClass('selected');
-    $('.place').removeClass('selected');
-    $('.' + city_class).addClass('selected');
-    current_place = city_class;
+    $('.city').removeClass('selected');
+    $('.' + city.name).addClass('selected');
+    current_city = city;
     setDots();
 }
 
+function deleteCity(city) {
+    $('.' + city.name).remove();
+    cities.remove(city);
+    chrome.storage.sync.set({ 'cities': cities });
+    createDisplay();
+}
+
+function addCity(searchterm) {
+    var name = searchterm.split(', ')[0].toLowerCase().split(' ').join('-');
+    if (cities.findByName(name) != null) {
+        return;
+    }
+    cities.add(new City(name, searchterm, new Date()));
+}
+
+function currentlyOnSettingsPage() {
+    return $('#weather').hasClass('hidden');
+}
+
 function hideSettings() {
-    settings = false;
     $('#weather').removeClass('hidden');
     $('#info-text').addClass('hidden');
-    $('#places').removeClass('hidden');
+    $('#cities').removeClass('hidden');
+    $('#new-city').val('');
     hideInputError();
 }
 
 function showSettings() {
-    settings = true;
     $('#weather').addClass('hidden');
     $('#info-text').removeClass('hidden');
-    $('#places').addClass('hidden');
+    $('#cities').addClass('hidden');
     $('#new-city').focus();
     hideInputError();
 }
@@ -111,207 +213,37 @@ function hideInputError() {
     $('.new').removeClass('selected');
 }
 
-/**
- * Called when the document (weather.html) has loaded
- * and the DOM is ready for interactions
- */
-$(document).ready(function() {
-
-    $(document.body).addClass((window.cordova !== undefined) ? 'mobile' : 'not-mobile');
-
-    // Uses the Chrome Storage API to get the
-    // the cities the user has chosen and whether
-    // they have chosen for their temperatures
-    // to be shown in Celsius or Farenheit
-    //
-    // @see http://developer.chrome.com/trunk/apps/storage.html
-    chrome.storage.sync.get(function(items) {
-        for (var place_class in items.places) {
-            places[place_class] = items.places[place_class];
-        }
-        temp = items.temp;
-        if (!temp) temp = 'F';
-        $('input[name="temp-type"].' + temp).attr('checked', true);
-        setup();
-    });
-
-    $('.close').click(function() {
-        window.close();
-    });
-
-
-    // Tracks to changes to the temperature
-    // format. Stores the setting for the user
-    //
-    // @see http://developer.chrome.com/trunk/apps/storage.html
-    $('input[name="temp-type"]').change(function() {
-        temp = $('input[name="temp-type"]:checked').val();
-        chrome.storage.sync.set({ 'temp' : temp });
-        refresh();
-    });
-
-    // Refresh the weather forecast and update the UI every two hours
-    setInterval(function() {
-        refresh();
-    }, 1000 * 60 * 60 * 2);
-
-    // shows a specific place
-    $('#places .place').live('click', function() {
-        var city_class = $(this).attr('class').split(' ')[1];
-        selectCity(city_class);
-    });
-
-    // deletes a place and updates the stored
-    // places for the current user
-    //
-    // @see http://developer.chrome.com/trunk/apps/storage.html
-    $('.delete').live('click', function() {
-        var city_class = $(this).parent().attr('class').split(' ')[1];
-        $('.' + city_class).remove();
-        delete places[city_class];
-        chrome.storage.sync.set({ 'places': places });
-
-        var index = locations.indexOf(city_class);
-        locations.splice(index, 1);
-
-        if (sizeOf(places) === 0)
-            current_place = 'new';
-        else if (index === 0)
-            current_place = locations[0];
-        else
-            current_place = locations[index - 1];
-        selectCity(current_place);
-    });
-
-    // gets the location that the user
-    // has typed in and creates a view for it
-    $('.new .add').click(function() {
-        var location = $('#new-city').val();
-        current_place = location.toLowerCase().split(', ')[0].split(' ').join('-');
-        if (!(current_place in places)) {
-            var new_place = {};
-            new_place[current_place] = location;
-            createDisplay(new_place, true);
-        } else {
-            hideInputError();
-        }
-    });
-    
-    $('#new-city').keyup(function(e) {
-        if (event.which == 13) // enter
-            $('.new .add').click();
-        if (event.which == 27) // esc
-            $('.new .cancel').click();
-    });
-    
-    // cancels the city addition
-    $('.new .cancel').click(function() {
-        hideSettings();
-    });
-
-    // switches the weather and info views
-    $('#info').click(function() {
-        if (settings) {
-            hideSettings();
-        } else {
-            showSettings();
-        }
-    });
-
-
-    $('#places #next.shown').live('click', function() {
-        adjustnext(4);
-    });
-    
-    $(document).bind('swipeleft', function() {
-        if (settings) {
-            return;
-        }
-        adjustnext(1);
-    });
-
-    $('#places #prev.shown').live('click', function() {
-        adjustprev(4);
-    });
-
-    $(document).bind('swiperight', function() {
-        if (settings) {
-            return;
-        }
-        adjustprev(1);
-    });
-
-    $(document).keyup(function(event) {
-        if (settings) {
-            return;
-        }
-        if (event.which == 39)
-            adjustnext(1);
-        else if (event.which == 37)
-            adjustprev(1);
-    });
-
-    function adjustnext(n) {
-        var index = locations.indexOf(current_place);
-        if (index + n < locations.length)
-            current_place = locations[index + n];
-        else
-            current_place = locations[locations.length - 1];
-        selectCity(current_place);
-    }
-
-    function adjustprev(n) {
-        var index = locations.indexOf(current_place);
-        if (index - n >= 0)
-            current_place = locations[index - n];
-        else
-            current_place = locations[0];
-        selectCity(current_place);
-    }
-
-    document.ontouchmove = function(e) {
-        if (!settings) {
-            e.preventDefault();
-        }
-    };
-
-    document.addEventListener("backbutton" , function(e) {
-        if (settings) {
-            hideSettings();
-        } else {
-            window.navigator.app.exitApp();
-        }
-    }, false);     
-});
-
-/**
- * Geolocates the user to get their current position. Note
- * that this does not require user interaction, but is
- * required as a permission in the manifest
- *
- * @see http://developer.chrome.com/trunk/apps/manifest.html#permissions
- */
-function setup() {
-    navigator.geolocation.getCurrentPosition(getCurrentPosSuccessFunction, getCurrentPosErrorFunction);
+function getCurrentCity() {
+    var name = $("selected").attr('class').split(' ')[1];
+    return (!name) ? cities.asArray()[0] : cities.findByName(name);
 }
 
-/**
- * Removes all the markup and recreates
- */
+function adjustnext(n) {
+    var c = cities.sortedByKey('date');
+    var index = c.indexOf(getCurrentCity());
+    var newIndex = c[Math.min(c.length-1, index+n)];
+    selectCity(c[newIndex]);
+}
+
+function adjustprev(n) {
+    var c = cities.sortedByKey('date');
+    var index = c.indexOf(getCurrentCity());
+    var newIndex = c[Math.max(0, index-n)];
+    selectCity(c[newIndex]);
+}
+
 function refresh() {
-    for (var location_class in places) {
-        $('.' + location_class).remove();
-    }
-    createDisplay(places);
+    this.cities.asArray().forEach(function(city) {
+        $('.' + city.name).remove();
+    });
+    createDisplay();
 }
 
-/**
- * Callback for the successful geolocation request.
- * Expands on the latitude / longitude pairs
- *
- * @param {Object} position The geolocation position passed by the browser
- * @see http://www.w3.org/TR/geolocation-API/#position_interface
- */
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+// current geolocation
+
 function getCurrentPosSuccessFunction(position) {
     var lat = position.coords.latitude;
     var lng = position.coords.longitude;
@@ -321,7 +253,6 @@ function getCurrentPosSuccessFunction(position) {
         for (var i = 0; i < data.results.length; i++) {
             var component_types = data.results[i].types;
             if ((component_types.indexOf('street_address') != -1) || (component_types.indexOf('locality') != -1)) {
-
                 var address_components = data.results[i].address_components;
                 var city = '';
                 var country = '';
@@ -334,209 +265,137 @@ function getCurrentPosSuccessFunction(position) {
                         country = address_components[j].short_name;
                     }
                 }
-
-                var location = city + ', ' + country;
-                current_place = city.toLowerCase().split(' ').join('-');
-                if (!(current_place in places)) {
-                    places[current_place] = location;
-                }
+                addCity(city + ', ' + country);
                 break;
             }
         }
-        createDisplay(places);
+        refresh();
     }, 'json');
 }
 
-/**
- * Callback for when geolocation fails.
- * Sends the user through to the place locator
- *
- * @param {Object} error The browser's geolocation error
- * @see http://www.w3.org/TR/geolocation-API/#position_error_interface
- */
 function getCurrentPosErrorFunction(error) {
-  console.log("Geocoder failed");
-    for (var place in places) {
-        current_place = places[place];
-        break;
-  }
-    if (current_place === '') {
-        current_place = 'new';
-        $('#info-text').removeClass('hidden');
-    }
+    console.log("Geocoder failed");
+    // TODO: handle error
+    //$('#info-text').removeClass('hidden');
 }
 
-/**
- * Takes the list of locations and looks up
- * the weather data for them. It also stores
- * the collection of places stored in the Chrome
- * storage for those places
- *
- * @see http://developer.chrome.com/trunk/apps/storage.html
- */
-function createDisplay(locations, add) {
-    var handleGetLocationData = function(data) {
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+// "view"
+
+function getWeatherData(city, onsuccess, onerror) {
+    var url = encodeURI(base_weather_url + city.searchterm);
+    $.get(url, function(data) {
         if (!data.data.error) {
             var current_condition = data.data.current_condition[0];
             var weather = data.data.weather;
-            var city = data.data.request[0].query;
-            var location_class = city.toLowerCase().split(', ')[0].split(' ').join('-');
-            addLocationDisplay(city, current_condition, weather);
-
-            if (add) {
-                current_place = location_class;
-                places[location_class] = city;
-                chrome.storage.sync.set({ 'places': places });
-                $('settings').click();
-                selectCity(current_place);
-                hideInputError();
-            }
-        } else if (add) {
-            showInputError(location);
+            onsuccess(city, current_condition, weather);
+        } else {
+            onerror(city);
         }
+    }, 'json');
+};
 
-        // What follows is a workaround for broken jquery "live" onclick functionality on mobile.
-        // Need to 'poke' elements so they are clickable.
-        Array.prototype.forEach.call(document.querySelectorAll('#places .place'), function(e,i) {
-            e.onclick = function(){};
-        });
-        Array.prototype.forEach.call(document.querySelectorAll('.place-list .delete'), function(e,i) {
-            e.onclick = function(){};
-        });
-    };
-
-    for (var location_class in locations) {
-        var location = locations[location_class];
-        var url = encodeURI(base_weather_url + location);
-        $.get(url, handleGetLocationData, 'json');
-    }
+function createDisplay() {
+    cities.asArray().forEach(function(city) {
+        getWeatherData(city,
+            function(city, current_condition, weather) {
+                addLocationDisplay(city, current_condition, weather);
+            }, function(city) {
+                //TODO: handle error?
+            });
+    });
 }
 
-/**
- * Sets the display of dots at the bottom of the screen
- */
 function setDots() {
-    if (locations.length < 5) {
-        $('.place').addClass('shown');
-        $('#places #prev').removeClass('disabled').removeClass('shown');
-        $('#places #next').removeClass('disabled').removeClass('shown');
+    if (cities.length() <= num_buttons_at_bottom) {
+        $('.city').addClass('shown');
+        $('#cities #prev').removeClass('disabled').removeClass('shown');
+        $('#cities #next').removeClass('disabled').removeClass('shown');
     } else {
-        $('#places #prev').addClass('disabled');
-        $('#places #next').addClass('disabled');
-        $('.place').removeClass('shown');
-        var index = locations.indexOf(current_place);
-        var i = index % 4;
+        $('.city').removeClass('shown');
+
+        // TODO
+        var c = cities.sortedByKey('date');
+        var index = c.indexOf(getCurrentCity());
+        var i = index % num_buttons_at_bottom;
         var first = index - i;
-        for (var l = first; l < first + 4; l++)
-            $('#places .place.' + locations[l]).addClass('shown');
+        for (var l = first; l < first + num_buttons_at_bottom; l++)
+            $('#cities .city.' + c[l]).addClass('shown');
 
         if (first === 0)
-            $('#places #prev').removeClass('shown').addClass('disabled');
+            $('#cities #prev').removeClass('shown').addClass('disabled');
         else
-            $('#places #prev').addClass('shown').removeClass('disabled');
+            $('#cities #prev').addClass('shown').removeClass('disabled');
 
-        if ((first + 4) >= locations.length)
-            $('#places #next').removeClass('shown').addClass('disabled');
+        if ((first + num_buttons_at_bottom) >= c.length)
+            $('#cities #next').removeClass('shown').addClass('disabled');
         else
-            $('#places #next').addClass('shown').removeClass('disabled');
+            $('#cities #next').addClass('shown').removeClass('disabled');
 
     }
 }
 
-/**
- * Creates the markup for the city and adds the specific
- * values for the weather conditions, then adds
- * it to the weather view.
- *
- * @param {String} location The long name of the city
- * @param {Object} current_condition The current weather conditions
- * @param {Array} weather The 5-day weather forecast for the city
- */
-function addLocationDisplay(location, current_condition, weather) {
+// TODO: add "selected"
 
-    var city_class = location.toLowerCase().split(', ')[0].split(' ').join('-');
-    locations.push(city_class);
-    var selected = '';
-
-    if (city_class == current_place) {
-        selected = ' selected';
-    }
-
+function addLocationDisplay(city, current_condition, weather) {
     // create the markup
-    var description = ' ' + condition_codes[current_condition.weatherCode];
-    var location_html = '<div class="location ' + city_class + description + selected + '">' +
-                                            '</div>';
-    var city = location.split(', ')[0];
-    var location_dot_html = '<div class="place ' + city_class + selected + '"' +
-                                                    'title="' + city + '"></div>';
-    var city_html = cityDisplay(location);
-    var places_list_html = placesListItem(city_class, city);
+    var description = condition_codes[current_condition.weatherCode];
+    var location_html = '<div class="location ' + city.name + ' ' + description + '"></div>';
+    var location_dot_html = '<div class="city ' + city.name + '" title="' + city.name + '"></div>';
+    var city_html = '<div class="city">' + city.name.toUpperCase() + '</div>';
+    // TODO: honestly, wtf class=location once and class=city twice, one is the graphics one is the dot one is for name...
+    var cities_list_html = '<div class="city-list ' + city.name + '"><div class="delete"></div>' + city.searchterm + '</div>';
     var current_html = currentDisplay(current_condition);
-    var high_low = '<div class="high_low">' +
-                                        weather[0]['tempMax' + temp] + '&deg; / ' +
-                                        weather[0]['tempMin' + temp] + '&deg;' +
-                                 '</div>';
+    var tempMax = weather[0]['tempMax' + temp];
+    var tempMin = weather[0]['tempMin' + temp];
+    var high_low = '<div class="high_low">' + tempMax + '&deg; / ' + tempMin + '&deg;</div>';
     var day_html = '';
-
+    // TODO: remplace this with weather.map(dayDisplay).join or reduce or forEach
     for (var i = 0; i < weather.length; i++) {
         day_html += dayDisplay(weather, i);
     }
 
     // update the UI
-    $('#info-text .places-list').append(places_list_html);
+    $('#info-text .cities-list').append(cities_list_html);
     $('#weather').append(location_html);
-    $('#weather .' + city_class).append(current_html);
-    $('#weather .' + city_class).append(high_low);
-    $('#weather .' + city_class).append(city_html);
-    $('#places #next').before(location_dot_html);
+    $('#weather .' + city.name).append(current_html);
+    $('#weather .' + city.name).append(high_low);
+    $('#weather .' + city.name).append(city_html);
+    //$('#weather .' + city.name).append(day_html);
+    $('#cities #next').before(location_dot_html);
 
     setDots();
+
+    // TODO
+    // What follows is a workaround for broken jquery "live" onclick functionality on mobile.
+    // Need to 'poke' elements so they are clickable.
+    Array.prototype.forEach.call(document.querySelectorAll('#cities .city'), function(e,i) {
+        e.onclick = function(){};
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.city-list .delete'), function(e,i) {
+        e.onclick = function(){};
+    });
 }
 
-/**
- * Helper to wrap the city name in markup
- *
- * @param {String} location The long name of the city
- */
-function cityDisplay(location) {
-    var city = location.split(', ')[0];
-  var html = '<div class="city">' + city.toUpperCase() + '</div>';
-  return html;
-}
-
-/**
- * Helper to wrap the current weather conditions
- * in the appropriate markup
- *
- * @param {Object} current_condition The current weather conditions
- */
 function currentDisplay(current_condition) {
-
     var current_temp = current_condition['temp_' + temp];
     var current_description = current_condition.weatherDesc[0].value;
     var current_icon = condition_codes[current_condition.weatherCode];
     var html = '<div class="current">' +
                                 '<div class="current-temp">' + current_temp + '</div>' +
-                                '<div class="current-icon ' + current_icon + '"' +
-                                    ' title="' + current_description + '"></div>' +
+                                '<div class="current-icon ' + current_icon + '" title="' + current_description + '"></div>' +
                             '</div>';
     return html;
-
 }
 
-/**
- * Helper to wrap the weather for a specific day
- * in the appropriate markup
- *
- * @param {Array} weather The weather forecast, one object per day
- * @param {Number} i The index from the weather forecast array to wrap
- */
 function dayDisplay(weather, i) {
     var day_data = weather[i];
     var day_condition = condition_codes[day_data.weatherCode];
     var day_description = day_data.weatherDesc[0].value;
     var date = day_data.date.split('-');
-    var day = days[((new Date().getDay() + i) % 7)];
+    var day = days[((new Date().getDay() + i) % 7)][0];
     var html = '<div class="day"' + i + '">' +
                                 '<div class="date">' + day + '</div>' +
                                 '<div class="icon ' + day_condition + '"' +
@@ -547,30 +406,142 @@ function dayDisplay(weather, i) {
     return html;
 }
 
-/**
- * Helper to wrap a location in a div
- * with a specific class
- *
- * @param {String} city_class The class to wrap the location name
- * @param {String} location The location name to wrap
- */
-function placesListItem(city_class, location) {
-    var html = '<div class="place-list ' + city_class + '">' +
-                                '<div class="delete"></div>' + location +
-                            '</div>';
-    return html;
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+// init
+
+function initHandlers() {
+    $('.close').click(function() {
+        window.close();
+    });
+
+    $('input[name="temp-type"]').change(function() {
+        temp = $('input[name="temp-type"]:checked').val();
+        chrome.storage.sync.set({ 'temp' : temp });
+        refresh();
+    });
+
+    $('#cities .city').live('click', function() {
+        var city = $(this).attr('class').split(' ')[1];
+        selectCity(city);
+    });
+    
+    $('.delete').live('click', function() {
+        var city = $(this).parent().attr('class').split(' ')[1];
+        deleteCity(city);
+    });
+
+    $('.new .add').click(function() {
+        var searchterm = $('#new-city').val();
+        getWeatherData(new City(null, searchterm, null),
+            function(city) {
+                addCity(city.searchterm);
+            }, function(city) {
+                showInputError(city.searchterm);
+            });
+    });
+    
+    $('#new-city').keyup(function(e) {
+        if (event.which == 13) // enter
+            $('.new .add').click();
+        if (event.which == 27) // esc
+            $('.new .cancel').click();
+    });
+    
+    $('.new .cancel').click(function() {
+        hideSettings();
+    });
+
+    $('#info').click(function() {
+        if (currentlyOnSettingsPage()) {
+            hideSettings();
+        } else {
+            showSettings();
+        }
+    });
+
+
+    $('#cities #next.shown').live('click', function() {
+        adjustnext(num_buttons_at_bottom);
+    });
+    
+    $('#cities #prev.shown').live('click', function() {
+        adjustprev(num_buttons_at_bottom);
+    });
+
+    $(document).bind('swipeleft', function() {
+        if (currentlyOnSettingsPage()) {
+            return;
+        }
+        adjustnext(1);
+    });
+
+    $(document).bind('swiperight', function() {
+        if (currentlyOnSettingsPage()) {
+            return;
+        }
+        adjustprev(1);
+    });
+
+    $(document).keyup(function(event) {
+        if (currentlyOnSettingsPage()) {
+            return;
+        }
+        if (event.which == 39) // right-arrow
+            adjustnext(1);
+        else if (event.which == 37) // left-arrow
+            adjustprev(1);
+    });
+
+    // disable page scrolling only on main page
+    document.ontouchmove = function(e) {
+        if (!currentlyOnSettingsPage()) {
+            e.preventDefault();
+        }
+    };
+
+    document.addEventListener("backbutton" , function(e) {
+        if (currentlyOnSettingsPage()) {
+            hideSettings();
+        } else {
+            window.navigator.app.exitApp();
+        }
+    }, false);     
 }
 
-/**
- * Utility function to calculate the actual size
- * of an object in terms of the properties it contains
- *
- * @param {Object} dictionary The object to count
- */
-function sizeOf(dictionary) {
-    var count = 0;
-    for (var key in dictionary) {
-        if (dictionary.hasOwnProperty(key)) count++;
-    }
-    return count;
-}
+$(document).ready(function() {
+
+    $(document.body).addClass((window.cordova !== undefined) ? 'mobile' : 'not-mobile');
+
+    chrome.storage.sync.get(function(items) {
+        if (items.cities !== undefined && items.cities.version === Cities.CurrentVersion) {
+            cities = items.cities;
+            cities.__proto__ = Cities.prototype;
+        } else {
+            cities = new Cities();
+            for (var searchterm in items.cities) {
+                getWeatherData(new City(null, searchterm, null),
+                    function(city) {
+                        addCity(city.searchterm);
+                    }, function(city) {
+                        // TODO: handle error?
+                    });
+            }
+        }
+        temp = items.temp;
+        if (!temp) temp = 'F';
+        $('input[name="temp-type"].' + temp).attr('checked', true);
+        navigator.geolocation.getCurrentPosition(getCurrentPosSuccessFunction, getCurrentPosErrorFunction);
+    });
+
+    initHandlers();
+
+    setInterval(function() {
+        refresh();
+    }, 1000 * 60 * 60 * 2);
+});
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/

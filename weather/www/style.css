@@ -18,7 +18,7 @@ body {
   width: 300px;
 }
 
-a, #places div {
+a, #cities div {
   -webkit-app-region: no-drag;
 }
 
@@ -259,19 +259,19 @@ input[type=text].form-error{
 	margin-bottom: 10px;
 }
 
-#info-text .places-list {
+#info-text .cities-list {
 	margin-top: 10px;
 	overflow: auto;
 }
 
-.not-mobile #info-text .places-list {
+.not-mobile #info-text .cities-list {
 	height: 180px;
 }
 
-.mobile #info-text .places-list {
+.mobile #info-text .cities-list {
 }
 
-#info-text .places-list .delete {
+#info-text .cities-list .delete {
 	background: url('img/x.png') center no-repeat;
 	background-size: 12px 12px;
 	display: inline-block;
@@ -280,7 +280,7 @@ input[type=text].form-error{
 	width: 30px;
 }
 
-#info-text .places-list .delete:hover {
+#info-text .cities-list .delete:hover {
 	opacity: 1;
 }
 
@@ -357,7 +357,7 @@ input#new-city {
 	font-weight: normal;
 }
 
-#places {
+#cities {
 	width: 200px;
 	text-align: center;
 	white-space: nowrap;
@@ -368,8 +368,8 @@ input#new-city {
 	overflow: auto;
 }
 
-#places #prev,
-#places #next {
+#cities #prev,
+#cities #next {
 	width: 0;
 	height: 0;
 	border-top: 6px solid transparent;
@@ -379,27 +379,27 @@ input#new-city {
 	opacity: 0;
 }
 
-#places #prev {
+#cities #prev {
 	border-right: 8px solid #fff;
 	margin-right: 5px;
 }
 
-#places #next {
+#cities #next {
 	border-left: 8px solid #fff;
 	margin-left: 5px;
 }
 
-#places #prev.disabled,
-#places #next.disabled {
+#cities #prev.disabled,
+#cities #next.disabled {
 	opacity: 0.4;
 }
 
-#places #prev.shown,
-#places #next.shown {
+#cities #prev.shown,
+#cities #next.shown {
 	opacity: 1;
 }
 
-#places .place {
+#cities .city {
     border: 2px solid #fff;
 	border-radius: 8px;
 	height: 10px;
@@ -408,11 +408,11 @@ input#new-city {
 	display: none;
 }
 
-#places .place.shown {
+#cities .city.shown {
 	display: inline-block;
 }
 
-#places .place.selected {
+#cities .city.selected {
 	background-color: #fff;
 }
 
