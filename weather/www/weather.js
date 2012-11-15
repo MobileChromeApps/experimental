@@ -79,10 +79,11 @@ const condition_codes = {
 /******************************************************************************/
 // "model"
 
-function City(name, searchterm, date) {
+function City(name, searchterm) {
+    // TODO: remove name/searchterm and just have one canonical name (paris, canada vs paris, france etc)
     this.name = name;
     this.searchterm = searchterm;
-    this.date = date;
+    this.date = new Date();
 }
 
 function Cities() {
@@ -94,10 +95,12 @@ Cities.prototype.CurrentVersion = 2;
 
 Cities.prototype.add = function(city) {
     this.cities.push(city);
+    chrome.storage.sync.set({ 'cities': this });
 }
 
 Cities.prototype.remove = function(city) {
     this.cities.splice(this.cities.indexOf(city), 1);
+    chrome.storage.sync.set({ 'cities': this });
 }
 
 Cities.prototype.length = function() {
@@ -121,9 +124,12 @@ Cities.prototype.findByName = function(value) {
 Cities.prototype.sortedByKey = function(key) {
     return this.cities.slice(0).sort(function(a,b){
         var ret = (typeof a[key] === 'string') ? a[key].localeCompare(b[key]) : a[key] - b[key];
-        //console.log([a, b, key, a[key], b[key], ret]);
         return ret;
     });
+}
+
+Cities.prototype.ordered = function() {
+    return this.sortedByKey('date');
 }
 
 Cities.prototype.asArray = function(key) {
@@ -137,7 +143,7 @@ Cities.prototype.asArray = function(key) {
 
 var temp = 'F';
 var cities = null;
-var current_city = null; // TODO: remove this
+var selected_city = null;
 
 /******************************************************************************/
 /******************************************************************************/
@@ -158,18 +164,25 @@ function sizeOf(dictionary) {
 // "controller"
 
 function selectCity(city) {
+    // TODO save city selection on app exit
+
+    if (!city)
+        return;
+
+    selected_city = city.name;
+    chrome.storage.sync.set({selected_city: selected_city});
+    
     $('.location').removeClass('selected');
     $('.city').removeClass('selected');
     $('.' + city.name).addClass('selected');
-    current_city = city;
-    setDots();
 }
 
 function deleteCity(city) {
+    if (!city)
+        return;
     $('.' + city.name).remove();
     cities.remove(city);
-    chrome.storage.sync.set({ 'cities': cities });
-    createDisplay();
+    selectCity(getCurrentCity());
 }
 
 function addCity(searchterm) {
@@ -177,7 +190,11 @@ function addCity(searchterm) {
     if (cities.findByName(name) != null) {
         return;
     }
-    cities.add(new City(name, searchterm, new Date()));
+    var city = new City(name, searchterm);
+    cities.add(city);
+    selectCity(city);
+    refresh();
+    return city;
 }
 
 function currentlyOnSettingsPage() {
@@ -214,29 +231,24 @@ function hideInputError() {
 }
 
 function getCurrentCity() {
-    var name = $("selected").attr('class').split(' ')[1];
-    return (!name) ? cities.asArray()[0] : cities.findByName(name);
+    var city = cities.findByKey('selected', true);
+    if (!city && cities.length() > 0)
+        city = cities.asArray()[0];
+    return city;
 }
 
 function adjustnext(n) {
-    var c = cities.sortedByKey('date');
+    var c = cities.ordered();
     var index = c.indexOf(getCurrentCity());
-    var newIndex = c[Math.min(c.length-1, index+n)];
-    selectCity(c[newIndex]);
+    var newCity = c[Math.min(c.length-1, index+n)];
+    selectCity(newCity);
 }
 
 function adjustprev(n) {
-    var c = cities.sortedByKey('date');
+    var c = cities.ordered();
     var index = c.indexOf(getCurrentCity());
-    var newIndex = c[Math.max(0, index-n)];
-    selectCity(c[newIndex]);
-}
-
-function refresh() {
-    this.cities.asArray().forEach(function(city) {
-        $('.' + city.name).remove();
-    });
-    createDisplay();
+    var newCity = c[Math.max(0, index-n)];
+    selectCity(newCity);
 }
 
 /******************************************************************************/
@@ -250,26 +262,30 @@ function getCurrentPosSuccessFunction(position) {
     var url = base_city_url + lat + ',' + lng;
 
     $.get(url, function(data) {
+        var address_components = null;
         for (var i = 0; i < data.results.length; i++) {
             var component_types = data.results[i].types;
             if ((component_types.indexOf('street_address') != -1) || (component_types.indexOf('locality') != -1)) {
-                var address_components = data.results[i].address_components;
-                var city = '';
-                var country = '';
-
-                for (var j = 0; j < address_components.length; j++) {
-                    if (address_components[j].types.indexOf('locality') != -1) {
-                        city = address_components[j].long_name;
-                    }
-                    if (address_components[j].types.indexOf('country') != -1) {
-                        country = address_components[j].short_name;
-                    }
-                }
-                addCity(city + ', ' + country);
+                address_components = data.results[i].address_components;
                 break;
             }
         }
-        refresh();
+
+        if (!address_components)
+            return;
+
+        var city = '';
+        var country = '';
+        for (var j = 0; j < address_components.length; j++) {
+            if (address_components[j].types.indexOf('locality') != -1) {
+                city = address_components[j].long_name;
+            }
+            if (address_components[j].types.indexOf('country') != -1) {
+                country = address_components[j].short_name;
+            }
+        }
+
+        addCity(city + ', ' + country);
     }, 'json');
 }
 
@@ -297,7 +313,8 @@ function getWeatherData(city, onsuccess, onerror) {
     }, 'json');
 };
 
-function createDisplay() {
+function refresh() {
+    console.log("refresh");
     cities.asArray().forEach(function(city) {
         getWeatherData(city,
             function(city, current_condition, weather) {
@@ -309,6 +326,11 @@ function createDisplay() {
 }
 
 function setDots() {
+    $('#cities #prev').removeClass('disabled').removeClass('shown');
+    $('#cities #next').removeClass('disabled').removeClass('shown');
+    $('.city').addClass('shown');
+    return;
+
     if (cities.length() <= num_buttons_at_bottom) {
         $('.city').addClass('shown');
         $('#cities #prev').removeClass('disabled').removeClass('shown');
@@ -316,13 +338,12 @@ function setDots() {
     } else {
         $('.city').removeClass('shown');
 
-        // TODO
-        var c = cities.sortedByKey('date');
+        var c = cities.ordererd();
         var index = c.indexOf(getCurrentCity());
         var i = index % num_buttons_at_bottom;
         var first = index - i;
-        for (var l = first; l < first + num_buttons_at_bottom; l++)
-            $('#cities .city.' + c[l]).addClass('shown');
+        for (var l = first; l < first + num_buttons_at_bottom && l < c.length; l++)
+            $('#cities .city.' + c[l].name).addClass('shown');
 
         if (first === 0)
             $('#cities #prev').removeClass('shown').addClass('disabled');
@@ -337,10 +358,10 @@ function setDots() {
     }
 }
 
-// TODO: add "selected"
-
 function addLocationDisplay(city, current_condition, weather) {
-    // create the markup
+    // First, remove old city data
+    $('.' + city.name).remove();
+
     var description = condition_codes[current_condition.weatherCode];
     var location_html = '<div class="location ' + city.name + ' ' + description + '"></div>';
     var location_dot_html = '<div class="city ' + city.name + '" title="' + city.name + '"></div>';
@@ -366,6 +387,9 @@ function addLocationDisplay(city, current_condition, weather) {
     //$('#weather .' + city.name).append(day_html);
     $('#cities #next').before(location_dot_html);
 
+    if (city.name === selected_city || (!selected_city && city === cities.ordered()[0]))
+        selectCity(city);
+
     setDots();
 
     // TODO
@@ -381,7 +405,7 @@ function addLocationDisplay(city, current_condition, weather) {
 
 function currentDisplay(current_condition) {
     var current_temp = current_condition['temp_' + temp];
-    var current_description = current_condition.weatherDesc[0].value;
+    var current_description = current_condition.weatherDes/[0].value;
     var current_icon = condition_codes[current_condition.weatherCode];
     var html = '<div class="current">' +
                                 '<div class="current-temp">' + current_temp + '</div>' +
@@ -416,27 +440,29 @@ function initHandlers() {
         window.close();
     });
 
-    $('input[name="temp-type"]').change(function() {
+    $('input[name="temp-type"]').change(function() { // TODO: this is firing twice per change!
         temp = $('input[name="temp-type"]:checked').val();
         chrome.storage.sync.set({ 'temp' : temp });
         refresh();
     });
 
     $('#cities .city').live('click', function() {
-        var city = $(this).attr('class').split(' ')[1];
-        selectCity(city);
+        // TODO fix this up
+        var name = $(this).attr('class').split(' ')[1];
+        selectCity(cities.findByName(name));
     });
     
     $('.delete').live('click', function() {
-        var city = $(this).parent().attr('class').split(' ')[1];
-        deleteCity(city);
+        var name = $(this).parent().attr('class').split(' ')[1];
+        deleteCity(cities.findByName(name));
     });
 
     $('.new .add').click(function() {
         var searchterm = $('#new-city').val();
-        getWeatherData(new City(null, searchterm, null),
+        getWeatherData(new City(null, searchterm),
             function(city) {
-                addCity(city.searchterm);
+                var city = addCity(city.searchterm);
+                hideInputError();
             }, function(city) {
                 showInputError(city.searchterm);
             });
@@ -518,10 +544,15 @@ $(document).ready(function() {
         if (items.cities !== undefined && items.cities.version === Cities.CurrentVersion) {
             cities = items.cities;
             cities.__proto__ = Cities.prototype;
+            cities.asArray().forEach(function(city) {
+                city.__proto__ = City.prototype;
+            });
+            selected_city = items.selected_city;
+            refresh();
         } else {
             cities = new Cities();
             for (var searchterm in items.cities) {
-                getWeatherData(new City(null, searchterm, null),
+                getWeatherData(new City(null, searchterm),
                     function(city) {
                         addCity(city.searchterm);
                     }, function(city) {
