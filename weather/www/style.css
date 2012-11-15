@@ -1,10 +1,10 @@
 html {
 	height: 450px;
-  width: 300px;
-  margin: 0px;
-  padding: 0px;
-  font-weight: normal;
-  -webkit-app-region: drag;
+    width: 300px;
+    margin: 0px;
+    padding: 0px;
+    font-weight: normal;
+    -webkit-app-region: drag;
 }
 
 body {
@@ -18,7 +18,7 @@ body {
   width: 300px;
 }
 
-a, #cities div {
+a, #dots div {
   -webkit-app-region: no-drag;
 }
 
@@ -235,7 +235,7 @@ input[type=text].form-error{
   margin-bottom: 5px;
 }
 
-#info-text {
+#settings {
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -246,8 +246,8 @@ input[type=text].form-error{
 	padding: 15px;
 }
 
-#info-text .source,
-#info-text .source a {
+#settings .source,
+#settings .source a {
 	color: #fff;
 	font-size: 11px;
 	margin-bottom: 10px;
@@ -255,23 +255,23 @@ input[type=text].form-error{
 	text-align: center;
 }
 
-#info-text .new {
+#settings .new {
 	margin-bottom: 10px;
 }
 
-#info-text .cities-list {
+#settings .cities-list {
 	margin-top: 10px;
 	overflow: auto;
 }
 
-.not-mobile #info-text .cities-list {
+.not-mobile #settings .cities-list {
 	height: 180px;
 }
 
-.mobile #info-text .cities-list {
+.mobile #settings .cities-list {
 }
 
-#info-text .cities-list .delete {
+#settings .cities-list .delete {
 	background: url('img/x.png') center no-repeat;
 	background-size: 12px 12px;
 	display: inline-block;
@@ -280,7 +280,7 @@ input[type=text].form-error{
 	width: 30px;
 }
 
-#info-text .cities-list .delete:hover {
+#settings .cities-list .delete:hover {
 	opacity: 1;
 }
 
@@ -302,7 +302,7 @@ input[type=text].form-error{
 	width: 100%;
 }
 
-.location {
+.forecast {
 	display: none;
 	height: 245px;
 	position: absolute;
@@ -319,7 +319,7 @@ input#new-city {
 	margin-top: 10px;
 }
 
-.location.selected {
+.forecast.selected {
 	display: block;
 }
 
@@ -357,7 +357,7 @@ input#new-city {
 	font-weight: normal;
 }
 
-#cities {
+#dots {
 	width: 200px;
 	text-align: center;
 	white-space: nowrap;
@@ -368,8 +368,8 @@ input#new-city {
 	overflow: auto;
 }
 
-#cities #prev,
-#cities #next {
+#dots #prev,
+#dots #next {
 	width: 0;
 	height: 0;
 	border-top: 6px solid transparent;
@@ -379,27 +379,27 @@ input#new-city {
 	opacity: 0;
 }
 
-#cities #prev {
+#dots #prev {
 	border-right: 8px solid #fff;
 	margin-right: 5px;
 }
 
-#cities #next {
+#dots #next {
 	border-left: 8px solid #fff;
 	margin-left: 5px;
 }
 
-#cities #prev.disabled,
-#cities #next.disabled {
+#dots #prev.disabled,
+#dots #next.disabled {
 	opacity: 0.4;
 }
 
-#cities #prev.shown,
-#cities #next.shown {
+#dots #prev.shown,
+#dots #next.shown {
 	opacity: 1;
 }
 
-#cities .city {
+#dots .dot {
     border: 2px solid #fff;
 	border-radius: 8px;
 	height: 10px;
@@ -408,11 +408,11 @@ input#new-city {
 	display: none;
 }
 
-#cities .city.shown {
+#dots .dot.shown {
 	display: inline-block;
 }
 
-#cities .city.selected {
+#dots .dot.selected {
 	background-color: #fff;
 }
 
@@ -491,91 +491,91 @@ input#new-city {
 	background-size: 34px 34px;
 }
 
-.location.cloudy {
+.forecast.cloudy {
 	background-color: #75d6ff;
   background-image: linear-gradient(top, #75d6ff, #45a6dd);
   background-image: -webkit-linear-gradient(top, #75d6ff, #45a6dd);
 }
 
-.location.hail {
+.forecast.hail {
 	background-color: #6f9fba;
   background-image: linear-gradient(top, #6f9fba, #3f6f8a);
   background-image: -webkit-linear-gradient(top, #6f9fba, #3f6f8a);
 }
 
-.location.light-rain {
+.forecast.light-rain {
 	background-color: #82bddf;
   background-image: linear-gradient(top, #82bddf, #528daf);
   background-image: -webkit-linear-gradient(top, #82bddf, #528daf);
 }
 
-.location.light-snow {
+.forecast.light-snow {
 	background-color: #c0e5ff;
   background-image: linear-gradient(top, #c0e5ff, #90b5d7);
   background-image: -webkit-linear-gradient(top, #c0e5ff, #90b5d7);
 }
 
-.location.mostly-sunny {
+.forecast.mostly-sunny {
 	background-color: #a1d0ed;
   background-image: linear-gradient(top, #a1d0ed, #71a0bd);
   background-image: -webkit-linear-gradient(top, #a1d0ed, #71a0bd);
  }
 
-.location.partly-cloudy {
+.forecast.partly-cloudy {
 	background-color: #f6b955;
   background-image: linear-gradient(top, #f6b955, #d68925);
   background-image: -webkit-linear-gradient(top, #f6b955, #d68925);
 }
 
-.location.rain-snow {
+.forecast.rain-snow {
 	background-color: #6f9fba;
   background-image: linear-gradient(top, #6f9fba, #3f6f8a);
   background-image: -webkit-linear-gradient(top, #6f9fba, #3f6f8a);
 }
 
-.location.rain {
+.forecast.rain {
 	background-color: #78afce;
   background-image: linear-gradient(top, #78afce, #487f9e);
   background-image: -webkit-linear-gradient(top, #78afce, #487f9e);
 }
 
-.location.scattered-light-rain {
+.forecast.scattered-light-rain {
 	background-color: #8fd6fe;
   background-image: linear-gradient(top, #8fd6fe, #5fa6ce);
   background-image: -webkit-linear-gradient(top, #8fd6fe, #5fa6ce);
 }
 
-.location.scattered-rain {
+.forecast.scattered-rain {
 	background-color: #84c4e8;
   background-image: linear-gradient(top, #84c4e8, #5494b8);
   background-image: -webkit-linear-gradient(top, #84c4e8, #5494b8);
 }
 
-.location.scattered-snow {
+.forecast.scattered-snow {
 	background-color: #8ee5ff;
   background-image: linear-gradient(top, #8ee5ff, #5eb5d7);
   background-image: -webkit-linear-gradient(top, #8ee5ff, #5eb5d7);
 }
 
-.location.scattered-tstorm {
+.forecast.scattered-tstorm {
 	background-color: #3f4d55;
   background-image: linear-gradient(top, #3f4d55, #0f1d25);
   background-image: -webkit-linear-gradient(top, #3f4d55, #0f1d25);
 }
 
-.location.snow {
+.forecast.snow {
 	background-color: #c0e5ff;
   background-image: linear-gradient(top, #c0e5ff, #90b5d7);
   background-image: -webkit-linear-gradient(top, #c0e5ff, #90b5d7);
  }
 
-.location.sunny {
+.forecast.sunny {
 	background-color: #ffc33b;
   background-image: linear-gradient(top, #ffc33b, #ea930b);
   background-image: -webkit-linear-gradient(top, #ffc33b, #ea930b);
 }
 
-.location.tstorm {
+.forecast.tstorm {
 	background-color: #3f4d55;
   background-image: linear-gradient(top, #3f4d55, #0f1d25);
   background-image: -webkit-linear-gradient(top, #3f4d55, #0f1d25);

@@ -9,7 +9,7 @@
 /******************************************************************************/
 // consts
 
-const num_buttons_at_bottom = 4;
+const num_dots_at_bottom = 4;
 const base_weather_url = 'http://free.worldweatheronline.com/feed/weather.ashx?format=json&num_of_days=5&key=78b33b52eb213218120708&q=';
 const base_city_url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&latlng=';
 
@@ -143,7 +143,7 @@ Cities.prototype.asArray = function(key) {
 
 var temp = 'F';
 var cities = null;
-var selected_city = null;
+var current_city = null;
 
 /******************************************************************************/
 /******************************************************************************/
@@ -169,11 +169,11 @@ function selectCity(city) {
     if (!city)
         return;
 
-    selected_city = city.name;
-    chrome.storage.sync.set({selected_city: selected_city});
+    current_city = city.name;
+    chrome.storage.sync.set({current_city: current_city});
     
-    $('.location').removeClass('selected');
-    $('.city').removeClass('selected');
+    $('.forecast').removeClass('selected');
+    $('.dot').removeClass('selected');
     $('.' + city.name).addClass('selected');
 }
 
@@ -203,23 +203,23 @@ function currentlyOnSettingsPage() {
 
 function hideSettings() {
     $('#weather').removeClass('hidden');
-    $('#info-text').addClass('hidden');
-    $('#cities').removeClass('hidden');
+    $('#settings').addClass('hidden');
+    $('#dots').removeClass('hidden');
     $('#new-city').val('');
     hideInputError();
 }
 
 function showSettings() {
     $('#weather').addClass('hidden');
-    $('#info-text').removeClass('hidden');
-    $('#cities').addClass('hidden');
+    $('#settings').removeClass('hidden');
+    $('#dots').addClass('hidden');
     $('#new-city').focus();
     hideInputError();
 }
 
-function showInputError(location) {
+function showInputError(searchterm) {
     $('input#new-city').addClass('form-error');
-    $('.new .error-message').text('Could not find weather for \'' + location + '\'');
+    $('.new .error-message').text('Could not find weather for \'' + searchterm + '\'');
     $('.new .error-message').removeClass('hidden');
 }
 
@@ -231,7 +231,7 @@ function hideInputError() {
 }
 
 function getCurrentCity() {
-    var city = cities.findByKey('selected', true);
+    var city = cities.findByName(current_city);
     if (!city && cities.length() > 0)
         city = cities.asArray()[0];
     return city;
@@ -291,8 +291,7 @@ function getCurrentPosSuccessFunction(position) {
 
 function getCurrentPosErrorFunction(error) {
     console.log("Geocoder failed");
-    // TODO: handle error
-    //$('#info-text').removeClass('hidden');
+    showSettings();
 }
 
 /******************************************************************************/
@@ -314,7 +313,6 @@ function getWeatherData(city, onsuccess, onerror) {
 };
 
 function refresh() {
-    console.log("refresh");
     cities.asArray().forEach(function(city) {
         getWeatherData(city,
             function(city, current_condition, weather) {
@@ -326,34 +324,29 @@ function refresh() {
 }
 
 function setDots() {
-    $('#cities #prev').removeClass('disabled').removeClass('shown');
-    $('#cities #next').removeClass('disabled').removeClass('shown');
-    $('.city').addClass('shown');
-    return;
-
-    if (cities.length() <= num_buttons_at_bottom) {
-        $('.city').addClass('shown');
-        $('#cities #prev').removeClass('disabled').removeClass('shown');
-        $('#cities #next').removeClass('disabled').removeClass('shown');
+    if (cities.length() <= num_dots_at_bottom) {
+        $('.dot').addClass('shown');
+        $('#dots #prev').removeClass('disabled').removeClass('shown');
+        $('#dots #next').removeClass('disabled').removeClass('shown');
     } else {
-        $('.city').removeClass('shown');
+        $('.dot').removeClass('shown');
 
-        var c = cities.ordererd();
+        var c = cities.ordered();
         var index = c.indexOf(getCurrentCity());
-        var i = index % num_buttons_at_bottom;
+        var i = index % num_dots_at_bottom;
         var first = index - i;
-        for (var l = first; l < first + num_buttons_at_bottom && l < c.length; l++)
-            $('#cities .city.' + c[l].name).addClass('shown');
+        for (var l = first; l < first + num_dots_at_bottom && l < c.length; l++)
+            $('#dots .dot.' + c[l].name).addClass('shown');
 
         if (first === 0)
-            $('#cities #prev').removeClass('shown').addClass('disabled');
+            $('#dots #prev').removeClass('shown').addClass('disabled');
         else
-            $('#cities #prev').addClass('shown').removeClass('disabled');
+            $('#dots #prev').addClass('shown').removeClass('disabled');
 
-        if ((first + num_buttons_at_bottom) >= c.length)
-            $('#cities #next').removeClass('shown').addClass('disabled');
+        if ((first + num_dots_at_bottom) >= c.length)
+            $('#dots #next').removeClass('shown').addClass('disabled');
         else
-            $('#cities #next').addClass('shown').removeClass('disabled');
+            $('#dots #next').addClass('shown').removeClass('disabled');
 
     }
 }
@@ -363,10 +356,9 @@ function addLocationDisplay(city, current_condition, weather) {
     $('.' + city.name).remove();
 
     var description = condition_codes[current_condition.weatherCode];
-    var location_html = '<div class="location ' + city.name + ' ' + description + '"></div>';
-    var location_dot_html = '<div class="city ' + city.name + '" title="' + city.name + '"></div>';
+    var forecast_html = '<div class="forecast ' + city.name + ' ' + description + '"></div>';
+    var dot_html = '<div class="dot ' + city.name + '" title="' + city.name + '"></div>';
     var city_html = '<div class="city">' + city.name.toUpperCase() + '</div>';
-    // TODO: honestly, wtf class=location once and class=city twice, one is the graphics one is the dot one is for name...
     var cities_list_html = '<div class="city-list ' + city.name + '"><div class="delete"></div>' + city.searchterm + '</div>';
     var current_html = currentDisplay(current_condition);
     var tempMax = weather[0]['tempMax' + temp];
@@ -379,15 +371,15 @@ function addLocationDisplay(city, current_condition, weather) {
     }
 
     // update the UI
-    $('#info-text .cities-list').append(cities_list_html);
-    $('#weather').append(location_html);
+    $('#settings .cities-list').append(cities_list_html);
+    $('#weather').append(forecast_html);
     $('#weather .' + city.name).append(current_html);
     $('#weather .' + city.name).append(high_low);
     $('#weather .' + city.name).append(city_html);
     //$('#weather .' + city.name).append(day_html);
-    $('#cities #next').before(location_dot_html);
+    $('#dots #next').before(dot_html); // TODO: instead of always append-to-end, should add in sorted order
 
-    if (city.name === selected_city || (!selected_city && city === cities.ordered()[0]))
+    if (city === getCurrentCity())
         selectCity(city);
 
     setDots();
@@ -395,7 +387,7 @@ function addLocationDisplay(city, current_condition, weather) {
     // TODO
     // What follows is a workaround for broken jquery "live" onclick functionality on mobile.
     // Need to 'poke' elements so they are clickable.
-    Array.prototype.forEach.call(document.querySelectorAll('#cities .city'), function(e,i) {
+    Array.prototype.forEach.call(document.querySelectorAll('#dots .dot'), function(e,i) {
         e.onclick = function(){};
     });
     Array.prototype.forEach.call(document.querySelectorAll('.city-list .delete'), function(e,i) {
@@ -446,7 +438,7 @@ function initHandlers() {
         refresh();
     });
 
-    $('#cities .city').live('click', function() {
+    $('#dots .dot').live('click', function() {
         // TODO fix this up
         var name = $(this).attr('class').split(' ')[1];
         selectCity(cities.findByName(name));
@@ -488,12 +480,12 @@ function initHandlers() {
     });
 
 
-    $('#cities #next.shown').live('click', function() {
-        adjustnext(num_buttons_at_bottom);
+    $('#dots #next.shown').live('click', function() {
+        adjustnext(num_dots_at_bottom);
     });
     
-    $('#cities #prev.shown').live('click', function() {
-        adjustprev(num_buttons_at_bottom);
+    $('#dots #prev.shown').live('click', function() {
+        adjustprev(num_dots_at_bottom);
     });
 
     $(document).bind('swipeleft', function() {
@@ -547,7 +539,7 @@ $(document).ready(function() {
             cities.asArray().forEach(function(city) {
                 city.__proto__ = City.prototype;
             });
-            selected_city = items.selected_city;
+            current_city = items.current_city;
             refresh();
         } else {
             cities = new Cities();
