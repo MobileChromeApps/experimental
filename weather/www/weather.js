@@ -213,6 +213,7 @@ function getCurrentCity() {
 
 function addWeatherData(city, current_condition, forecast) {
     weather_data[city.id] = new WeatherData(city, current_condition, forecast);
+    refresh();
 }
 
 function currentlyOnSettingsPage() {
@@ -291,7 +292,6 @@ function updateAllWeatherData() {
         getWeatherData(city.searchterm,
             function(searchterm, current_condition, forecast) {
                 addWeatherData(city, current_condition, forecast);
-                refresh();
             }, function(searchterm) {
                 //TODO: handle error?
             });
@@ -333,7 +333,6 @@ function getCurrentPosSuccessFunction(position) {
         }
 
         attemptAddCity(city + ', ' + country);
-        refresh();
     }, 'json');
 }
 
@@ -486,7 +485,6 @@ function initHandlers() {
     $('.new .add').click(function() {
         var searchterm = $('#new-city').val();
         attemptAddCity(searchterm, hideInputError, showInputError.bind(null, searchterm));
-        refresh();
     });
     
     $('#new-city').keyup(function(e) {
@@ -570,13 +568,13 @@ $(document).ready(function() {
                 city.date = new Date(city.date);
             });
             current_city = items.current_city;
-            updateAllWeatherData();
         } else {
             cities = new Cities();
         }
         temp = items.temp;
         if (!temp) temp = 'F';
         $('input[name="temp-type"].' + temp).attr('checked', true);
+        updateAllWeatherData();
         navigator.geolocation.getCurrentPosition(getCurrentPosSuccessFunction, getCurrentPosErrorFunction);
     });
 
