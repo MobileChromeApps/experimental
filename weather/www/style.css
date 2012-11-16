@@ -287,14 +287,15 @@ input[type=text].form-error{
 #info {
 	background: url('img/settings.png') center no-repeat;
 	background-size: 16px 16px;
+	position: absolute;
 	top: 0px;
+	right: 0px;
 	cursor: pointer;
 	height: 40px;
 	padding: 2px;
-	position: absolute;
-	right: 0px;
 	width: 40px;
 	-webkit-app-region: no-drag;
+	z-index: 100;
 }
 
 #weather {

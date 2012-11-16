@@ -79,9 +79,9 @@ const condition_codes = {
 /******************************************************************************/
 // "model"
 
-function City(name, searchterm) {
-    // TODO: remove name/searchterm and just have one canonical name (paris, canada vs paris, france etc)
-    this.name = name;
+function City(id, searchterm) {
+    // TODO: remove id/searchterm and just have one canonical id (paris, canada vs paris, france etc)
+    this.id = id;
     this.searchterm = searchterm;
     this.date = new Date();
 }
@@ -93,14 +93,24 @@ function Cities() {
 
 Cities.prototype.CurrentVersion = 2;
 
+Cities.prototype.sync = function() {
+    this.cities.forEach(function(city) {
+        city.date = city.date.toJSON();
+    });
+    chrome.storage.sync.set({ 'cities': this });
+    this.cities.forEach(function(city) {
+        city.date = new Date(city.date);
+    });
+}
+
 Cities.prototype.add = function(city) {
     this.cities.push(city);
-    chrome.storage.sync.set({ 'cities': this });
+    this.sync();
 }
 
 Cities.prototype.remove = function(city) {
     this.cities.splice(this.cities.indexOf(city), 1);
-    chrome.storage.sync.set({ 'cities': this });
+    this.sync();
 }
 
 Cities.prototype.length = function() {
@@ -117,8 +127,8 @@ Cities.prototype.findByKey = function(key, value) {
     return null;
 }
 
-Cities.prototype.findByName = function(value) {
-    return this.findByKey("name", value);
+Cities.prototype.findById = function(value) {
+    return this.findByKey("id", value);
 }
 
 Cities.prototype.sortedByKey = function(key) {
@@ -136,6 +146,12 @@ Cities.prototype.asArray = function(key) {
     return this.cities;
 }
 
+function WeatherData(city, current_condition, forecast) {
+    this.city = city;
+    this.current_condition = current_condition;
+    this.forecast = forecast;
+}
+
 /******************************************************************************/
 /******************************************************************************/
 /******************************************************************************/
@@ -144,19 +160,7 @@ Cities.prototype.asArray = function(key) {
 var temp = 'F';
 var cities = null;
 var current_city = null;
-
-/******************************************************************************/
-/******************************************************************************/
-/******************************************************************************/
-// helpers
-
-function sizeOf(dictionary) {
-    var count = 0;
-    for (var key in dictionary) {
-        if (dictionary.hasOwnProperty(key)) count++;
-    }
-    return count;
-}
+var weather_data = {}; // map city.id->WeatherData
 
 /******************************************************************************/
 /******************************************************************************/
@@ -169,32 +173,46 @@ function selectCity(city) {
     if (!city)
         return;
 
-    current_city = city.name;
+    current_city = city.id;
     chrome.storage.sync.set({current_city: current_city});
     
     $('.forecast').removeClass('selected');
     $('.dot').removeClass('selected');
-    $('.' + city.name).addClass('selected');
+    $('.' + city.id).addClass('selected');
+
+    setDots();
 }
 
 function deleteCity(city) {
     if (!city)
         return;
-    $('.' + city.name).remove();
+    $('.' + city.id).remove();
+    delete weather_data[city.id];
     cities.remove(city);
     selectCity(getCurrentCity());
 }
 
 function addCity(searchterm) {
-    var name = searchterm.split(', ')[0].toLowerCase().split(' ').join('-');
-    if (cities.findByName(name) != null) {
-        return;
+    var id = searchterm.split(', ')[0].toLowerCase().split(' ').join('-');
+    var city = cities.findById(id);
+    if (city != null) {
+        return city;
     }
-    var city = new City(name, searchterm);
+    city = new City(id, searchterm);
     cities.add(city);
     selectCity(city);
-    refresh();
     return city;
+}
+
+function getCurrentCity() {
+    var city = cities.findById(current_city);
+    if (!city && cities.length() > 0)
+        city = cities.asArray()[0];
+    return city;
+}
+
+function addWeatherData(city, current_condition, forecast) {
+    weather_data[city.id] = new WeatherData(city, current_condition, forecast);
 }
 
 function currentlyOnSettingsPage() {
@@ -230,13 +248,6 @@ function hideInputError() {
     $('.new').removeClass('selected');
 }
 
-function getCurrentCity() {
-    var city = cities.findByName(current_city);
-    if (!city && cities.length() > 0)
-        city = cities.asArray()[0];
-    return city;
-}
-
 function adjustnext(n) {
     var c = cities.ordered();
     var index = c.indexOf(getCurrentCity());
@@ -249,6 +260,42 @@ function adjustprev(n) {
     var index = c.indexOf(getCurrentCity());
     var newCity = c[Math.max(0, index-n)];
     selectCity(newCity);
+}
+
+function attemptAddCity(searchterm, onsuccess, onerror) {
+    getWeatherData(searchterm, function(searchterm, current_condition, forecast) {
+        var city = addCity(searchterm);
+        addWeatherData(city, current_condition, forecast);
+        if (onsuccess !== undefined)
+            onsuccess();
+    }, onerror);
+}
+
+function getWeatherData(searchterm, onsuccess, onerror) {
+    var url = encodeURI(base_weather_url + searchterm);
+    $.get(url, function(data) {
+        if (!data.data.error) {
+            var current_condition = data.data.current_condition[0];
+            var forecast = data.data.weather;
+            if (onsuccess !== undefined)
+                onsuccess(searchterm, current_condition, forecast);
+        } else {
+            if (onerror !== undefined)
+                onerror(searchterm);
+        }
+    }, 'json');
+};
+
+function updateAllWeatherData() {
+    cities.asArray().forEach(function(city) {
+        getWeatherData(city.searchterm,
+            function(searchterm, current_condition, forecast) {
+                addWeatherData(city, current_condition, forecast);
+                refresh();
+            }, function(searchterm) {
+                //TODO: handle error?
+            });
+    });
 }
 
 /******************************************************************************/
@@ -285,7 +332,8 @@ function getCurrentPosSuccessFunction(position) {
             }
         }
 
-        addCity(city + ', ' + country);
+        attemptAddCity(city + ', ' + country);
+        refresh();
     }, 'json');
 }
 
@@ -299,27 +347,13 @@ function getCurrentPosErrorFunction(error) {
 /******************************************************************************/
 // "view"
 
-function getWeatherData(city, onsuccess, onerror) {
-    var url = encodeURI(base_weather_url + city.searchterm);
-    $.get(url, function(data) {
-        if (!data.data.error) {
-            var current_condition = data.data.current_condition[0];
-            var weather = data.data.weather;
-            onsuccess(city, current_condition, weather);
-        } else {
-            onerror(city);
-        }
-    }, 'json');
-};
-
 function refresh() {
-    cities.asArray().forEach(function(city) {
-        getWeatherData(city,
-            function(city, current_condition, weather) {
-                addLocationDisplay(city, current_condition, weather);
-            }, function(city) {
-                //TODO: handle error?
-            });
+    cities.sortedByKey('date').forEach(function(city) {
+        if (weather_data.hasOwnProperty(city.id)) {
+            console.log("here");
+            var w = weather_data[city.id];
+            addLocationDisplay(city, w.current_condition, w.forecast);
+        }
     });
 }
 
@@ -336,7 +370,7 @@ function setDots() {
         var i = index % num_dots_at_bottom;
         var first = index - i;
         for (var l = first; l < first + num_dots_at_bottom && l < c.length; l++)
-            $('#dots .dot.' + c[l].name).addClass('shown');
+            $('#dots .dot.' + c[l].id).addClass('shown');
 
         if (first === 0)
             $('#dots #prev').removeClass('shown').addClass('disabled');
@@ -351,32 +385,33 @@ function setDots() {
     }
 }
 
-function addLocationDisplay(city, current_condition, weather) {
+function addLocationDisplay(city, current_condition, forecast) {
+    console.log('addLocationDisplay', current_condition, forecast);
     // First, remove old city data
-    $('.' + city.name).remove();
+    $('.' + city.id).remove();
 
     var description = condition_codes[current_condition.weatherCode];
-    var forecast_html = '<div class="forecast ' + city.name + ' ' + description + '"></div>';
-    var dot_html = '<div class="dot ' + city.name + '" title="' + city.name + '"></div>';
-    var city_html = '<div class="city">' + city.name.toUpperCase() + '</div>';
-    var cities_list_html = '<div class="city-list ' + city.name + '"><div class="delete"></div>' + city.searchterm + '</div>';
+    var forecast_html = '<div class="forecast ' + city.id + ' ' + description + '"></div>';
+    var dot_html = '<div class="dot ' + city.id + '" title="' + city.id + '"></div>';
+    var city_html = '<div class="city">' + city.id.toUpperCase() + '</div>';
+    var cities_list_html = '<div class="city-list ' + city.id + '"><div class="delete"></div>' + city.searchterm + '</div>';
     var current_html = currentDisplay(current_condition);
-    var tempMax = weather[0]['tempMax' + temp];
-    var tempMin = weather[0]['tempMin' + temp];
+    var tempMax = forecast[0]['tempMax' + temp];
+    var tempMin = forecast[0]['tempMin' + temp];
     var high_low = '<div class="high_low">' + tempMax + '&deg; / ' + tempMin + '&deg;</div>';
     var day_html = '';
-    // TODO: remplace this with weather.map(dayDisplay).join or reduce or forEach
-    for (var i = 0; i < weather.length; i++) {
-        day_html += dayDisplay(weather, i);
+    // TODO: remplace this with forecast.map(dayDisplay).join or reduce or forEach
+    for (var i = 0; i < forecast.length; i++) {
+        day_html += dayDisplay(forecast, i);
     }
 
     // update the UI
     $('#settings .cities-list').append(cities_list_html);
     $('#weather').append(forecast_html);
-    $('#weather .' + city.name).append(current_html);
-    $('#weather .' + city.name).append(high_low);
-    $('#weather .' + city.name).append(city_html);
-    //$('#weather .' + city.name).append(day_html);
+    $('#weather .' + city.id).append(current_html);
+    $('#weather .' + city.id).append(high_low);
+    $('#weather .' + city.id).append(city_html);
+    //$('#weather .' + city.id).append(day_html);
     $('#dots #next').before(dot_html); // TODO: instead of always append-to-end, should add in sorted order
 
     if (city === getCurrentCity())
@@ -406,8 +441,8 @@ function currentDisplay(current_condition) {
     return html;
 }
 
-function dayDisplay(weather, i) {
-    var day_data = weather[i];
+function dayDisplay(forecast, i) {
+    var day_data = forecast[i];
     var day_condition = condition_codes[day_data.weatherCode];
     var day_description = day_data.weatherDesc[0].value;
     var date = day_data.date.split('-');
@@ -435,29 +470,24 @@ function initHandlers() {
     $('input[name="temp-type"]').change(function() { // TODO: this is firing twice per change!
         temp = $('input[name="temp-type"]:checked').val();
         chrome.storage.sync.set({ 'temp' : temp });
-        refresh();
+        updateAllWeatherData();
     });
 
     $('#dots .dot').live('click', function() {
         // TODO fix this up
-        var name = $(this).attr('class').split(' ')[1];
-        selectCity(cities.findByName(name));
+        var id = $(this).attr('class').split(' ')[1];
+        selectCity(cities.findById(id));
     });
     
     $('.delete').live('click', function() {
-        var name = $(this).parent().attr('class').split(' ')[1];
-        deleteCity(cities.findByName(name));
+        var id = $(this).parent().attr('class').split(' ')[1];
+        deleteCity(cities.findById(id));
     });
 
     $('.new .add').click(function() {
         var searchterm = $('#new-city').val();
-        getWeatherData(new City(null, searchterm),
-            function(city) {
-                var city = addCity(city.searchterm);
-                hideInputError();
-            }, function(city) {
-                showInputError(city.searchterm);
-            });
+        attemptAddCity(searchterm, hideInputError, showInputError.bind(null, searchterm));
+        refresh();
     });
     
     $('#new-city').keyup(function(e) {
@@ -538,19 +568,12 @@ $(document).ready(function() {
             cities.__proto__ = Cities.prototype;
             cities.asArray().forEach(function(city) {
                 city.__proto__ = City.prototype;
+                city.date = new Date(city.date);
             });
             current_city = items.current_city;
-            refresh();
+            updateAllWeatherData();
         } else {
             cities = new Cities();
-            for (var searchterm in items.cities) {
-                getWeatherData(new City(null, searchterm),
-                    function(city) {
-                        addCity(city.searchterm);
-                    }, function(city) {
-                        // TODO: handle error?
-                    });
-            }
         }
         temp = items.temp;
         if (!temp) temp = 'F';
@@ -561,7 +584,7 @@ $(document).ready(function() {
     initHandlers();
 
     setInterval(function() {
-        refresh();
+        updateAllWeatherData();
     }, 1000 * 60 * 60 * 2);
 });
 

@@ -1,4 +1,4 @@
-/*! Cordova for Chrome - v0.1.0 - 2012-11-12
+/*! Cordova for Chrome - v0.1.0 - 2012-11-16
 * http://github.com/MobileChromeApps/
 * Copyright (c) 2012 Google Inc.; Licensed MIT */
 
@@ -131,7 +131,7 @@ define('chrome.app.window', function(require, module) {
 
     var startIndex = pageContent.search(/<html([\s\S]*?)>/i);
     if (startIndex == -1) {
-      mobile.eventIframe.insertSiblingHTML(pageContent);
+      mobile.eventIframe.insertAdjacentHTML('afterend', pageContent);
     } else {
       startIndex = startIndex + RegExp.lastMatch.length;
       // Copy over the attributes of the <html> tag.
@@ -146,7 +146,11 @@ define('chrome.app.window', function(require, module) {
       applyAttributes(RegExp.lastParen, fgHead);
 
       headHtml = '<link rel="stylesheet" href="chromeappstyles.css">\n' + headHtml;
-      fgHead.innerHTML = headHtml;
+      // fgHead.innerHTML causes a DOMException on Android 2.3.
+      while (fgHead.lastChild) {
+        fgHead.removeChild(fgHead.lastChild);
+      }
+      fgHead.insertAdjacentHTML('beforeend', headHtml);
       evalScripts(fgHead);
 
       // Copy the <body> tag attributes.

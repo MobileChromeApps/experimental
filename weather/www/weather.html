@@ -13,6 +13,8 @@
 
 	<body>
 		<div class="close"></div>
+		<div id="info"></div>
+
 		<div id="settings" class="hidden">
 			<div class="source">
 				Powered by <a href="http://www.worldweatheronline.com/"
@@ -20,22 +22,23 @@
 											target="blank">World Weather Online</a>
 			</div>
 			<div class="new">
-				ADD CITY<br>
 				<input type="text" id="new-city" /><br>
 				<div class="error-message hidden"></div>
 				<div class="button blue add">ADD</div>
 				<div class="button cancel">CANCEL</div>
 			</div>
+
 			<input type="radio" name="temp-type" value="F" class="F"> FAHRENHEIT<br>
 			<input type="radio" name="temp-type" value="C" class="C"> CELSIUS
-			<div class="cities-list"></div>
+
+            <div class="cities-list"></div>
 		</div>
-		<div id="weather">
-		</div>
+        
+        <div id="weather"></div>
+
 		<div id="dots">
 			<div id="prev"></div>
 			<div id="next"></div>
 		</div>
-		<div id="info"></div>
 	</body>
 </html>
