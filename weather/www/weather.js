@@ -350,7 +350,6 @@ function getCurrentPosErrorFunction(error) {
 function refresh() {
     cities.sortedByKey('date').forEach(function(city) {
         if (weather_data.hasOwnProperty(city.id)) {
-            console.log("here");
             var w = weather_data[city.id];
             addLocationDisplay(city, w.current_condition, w.forecast);
         }
@@ -386,7 +385,6 @@ function setDots() {
 }
 
 function addLocationDisplay(city, current_condition, forecast) {
-    console.log('addLocationDisplay', current_condition, forecast);
     // First, remove old city data
     $('.' + city.id).remove();
 
@@ -467,7 +465,8 @@ function initHandlers() {
         window.close();
     });
 
-    $('input[name="temp-type"]').change(function() { // TODO: this is firing twice per change!
+    $('input[name="temp-type"]').change(function() {
+        // TODO: this is firing twice per change!
         temp = $('input[name="temp-type"]:checked').val();
         chrome.storage.sync.set({ 'temp' : temp });
         updateAllWeatherData();
