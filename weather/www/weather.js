@@ -120,9 +120,8 @@ Cities.prototype.length = function() {
 Cities.prototype.findByKey = function(key, value) {
     for (var i = 0; i < this.cities.length; ++i) {
         var city = this.cities[i];
-        if (city[key] === value) {
+        if (city[key] === value)
             return city;
-        }
     }
     return null;
 }
@@ -195,9 +194,8 @@ function deleteCity(city) {
 function addCity(searchterm) {
     var id = searchterm.split(', ')[0].toLowerCase().split(' ').join('-');
     var city = cities.findById(id);
-    if (city != null) {
+    if (city != null)
         return city;
-    }
     city = new City(id, searchterm);
     cities.add(city);
     selectCity(city);
@@ -324,12 +322,10 @@ function getCurrentPosSuccessFunction(position) {
         var city = '';
         var country = '';
         for (var j = 0; j < address_components.length; j++) {
-            if (address_components[j].types.indexOf('locality') != -1) {
+            if (address_components[j].types.indexOf('locality') != -1)
                 city = address_components[j].long_name;
-            }
-            if (address_components[j].types.indexOf('country') != -1) {
+            if (address_components[j].types.indexOf('country') != -1)
                 country = address_components[j].short_name;
-            }
         }
 
         attemptAddCity(city + ', ' + country);
@@ -499,11 +495,10 @@ function initHandlers() {
     });
 
     $('#info').click(function() {
-        if (currentlyOnSettingsPage()) {
+        if (currentlyOnSettingsPage())
             hideSettings();
-        } else {
+        else
             showSettings();
-        }
     });
 
 
@@ -516,23 +511,20 @@ function initHandlers() {
     });
 
     $(document).bind('swipeleft', function() {
-        if (currentlyOnSettingsPage()) {
+        if (currentlyOnSettingsPage())
             return;
-        }
         adjustnext(1);
     });
 
     $(document).bind('swiperight', function() {
-        if (currentlyOnSettingsPage()) {
+        if (currentlyOnSettingsPage())
             return;
-        }
         adjustprev(1);
     });
 
     $(document).keyup(function(event) {
-        if (currentlyOnSettingsPage()) {
+        if (currentlyOnSettingsPage())
             return;
-        }
         if (event.which == 39) // right-arrow
             adjustnext(1);
         else if (event.which == 37) // left-arrow
@@ -541,17 +533,15 @@ function initHandlers() {
 
     // disable page scrolling only on main page
     document.ontouchmove = function(e) {
-        if (!currentlyOnSettingsPage()) {
+        if (!currentlyOnSettingsPage())
             e.preventDefault();
-        }
     };
 
     document.addEventListener("backbutton" , function(e) {
-        if (currentlyOnSettingsPage()) {
+        if (currentlyOnSettingsPage())
             hideSettings();
-        } else {
+        else
             window.navigator.app.exitApp();
-        }
     }, false);     
 }
 
