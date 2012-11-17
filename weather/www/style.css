@@ -34,7 +34,7 @@ a, #dots div {
   -webkit-app-region: no-drag;
 }
 
-.close {
+#close {
   background-image: url('img/x.png');
   background-repeat: no-repeat;
   position: absolute;
@@ -48,11 +48,11 @@ a, #dots div {
   visibility: hidden;
 }
 
-.mobile .close {
+.mobile #close {
     display: none;
 }
 
-body:hover .close {
+body:hover #close {
   visibility: visible;
 }
 
@@ -228,7 +228,7 @@ input[type=text].form-error{
   border: 1px solid #ff3f3f;
 }
 
-.error-message {
+#error-message {
   color: #ff3f3f;
   padding: 0px;
   margin-top: -5px;
@@ -246,8 +246,8 @@ input[type=text].form-error{
 	padding: 15px;
 }
 
-#settings .source,
-#settings .source a {
+#settings #source,
+#settings #source a {
 	color: #fff;
 	font-size: 11px;
 	margin-bottom: 10px;
@@ -255,23 +255,23 @@ input[type=text].form-error{
 	text-align: center;
 }
 
-#settings .new {
+#settings #new {
 	margin-bottom: 10px;
 }
 
-#settings .cities-list {
+#settings #cities-list {
 	margin-top: 10px;
 	overflow: auto;
 }
 
-.not-mobile #settings .cities-list {
+.not-mobile #settings #cities-list {
 	height: 180px;
 }
 
-.mobile #settings .cities-list {
+.mobile #settings #cities-list {
 }
 
-#settings .cities-list .delete {
+#settings #cities-list .delete {
 	background: url('img/x.png') center no-repeat;
 	background-size: 12px 12px;
 	display: inline-block;
@@ -280,7 +280,7 @@ input[type=text].form-error{
 	width: 30px;
 }
 
-#settings .cities-list .delete:hover {
+#settings #cities-list .delete:hover {
 	opacity: 1;
 }
 
@@ -316,7 +316,7 @@ input[type=text].form-error{
 }
 
 
-input#new-city {
+#searchterm {
 	margin-top: 10px;
 }
 

@@ -4,6 +4,13 @@
  * found in the LICENSE file.
  **/
 
+
+/* TODO: Bugs to fix:
+ * 
+ * * Some formatter_address's are not formatted well for wether query
+ *  * ie, search for dublin returns formatted_address: "Dublin, Co. Dublin, Ireland"
+ *    and doing a weather search on that fails, so we dont add the city.
+
 /******************************************************************************/
 /******************************************************************************/
 /******************************************************************************/
@@ -18,13 +25,13 @@ const base_searchterm_url = 'http://maps.googleapis.com/maps/api/geocode/json?se
 // http://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=43.480926,-80.53766399999999
 
 const days = {
-    0 : 'Sunday',
-    1 : 'Monday',
-    2 : 'Tuesday',
-    3 : 'Wednesday',
-    4 : 'Thursday',
-    5 : 'Friday',
-    6 : 'Saturday'
+    0 : 'Sun',
+    1 : 'Mon',
+    2 : 'Tues',
+    3 : 'Wed',
+    4 : 'Thur',
+    5 : 'Fri',
+    6 : 'Sat'
 };
 
 const condition_codes = {
@@ -84,12 +91,16 @@ const condition_codes = {
 // "model"
 
 function City(address) {
+    // TODO: this doesn't really need to be a member, can just be a method, and then we don't need to worry about changing id format & sync issues
     this.id = City.ConvertAddressDomFriendly(address);
     this.address = address;
     this.date = new Date();
 }
 
 City.ConvertAddressDomFriendly = function(address) {
+    // TODO: improve this
+    if (!address)
+        return;
     return address.toLowerCase().replace(/,/g , "-").split(' ').join('-');
 }
 
@@ -174,19 +185,14 @@ var weather_data = {}; // map city.id->WeatherData
 // "controller"
 
 function selectCity(city) {
-    // TODO save city selection on app exit
-
     if (!city)
         return;
-
     current_city = city.id;
-    // TODO Perhaps don't sync the current city..
-    // First, because it spams sync server, but more importantly, because we should default to current location on app start
-    chrome.storage.sync.set({current_city: current_city});
     
     $('.forecast').removeClass('selected');
     $('.dot').removeClass('selected');
-    $('.' + city.id).addClass('selected');
+    $('.forecast[city=' + city.id + ']').addClass('selected');
+    $('.dot[city=' + city.id + ']').addClass('selected');
 
     setDots();
 }
@@ -194,10 +200,10 @@ function selectCity(city) {
 function deleteCity(city) {
     if (!city)
         return;
-    $('.' + city.id).remove();
+    $('[city=' + city.id +']').remove();
     delete weather_data[city.id];
     cities.remove(city);
-    selectCity(getCurrentCity());
+    selectCity(getCurrentCity()); // in case we removed the previously selected city
 }
 
 function addCity(address) {
@@ -207,11 +213,12 @@ function addCity(address) {
         return city;
     city = new City(address);
     cities.add(city);
-    selectCity(city);
     return city;
 }
 
 function getCurrentCity() {
+    // TODO: do we need to use current_city global for this?  Can we just walk the DOM?
+    // we set the city we want to be current, before we add it to the dom?
     var city = cities.findById(current_city);
     if (!city && cities.length() > 0)
         city = cities.asArray()[0];
@@ -231,7 +238,7 @@ function hideSettings() {
     $('#weather').removeClass('hidden');
     $('#settings').addClass('hidden');
     $('#dots').removeClass('hidden');
-    $('#new-city').val('');
+    $('#searchterm').val('');
     hideInputError();
 }
 
@@ -239,21 +246,21 @@ function showSettings() {
     $('#weather').addClass('hidden');
     $('#settings').removeClass('hidden');
     $('#dots').addClass('hidden');
-    $('#new-city').focus();
+    $('#searchterm').focus();
     hideInputError();
 }
 
 function showInputError(searchterm) {
-    $('input#new-city').addClass('form-error');
-    $('.new .error-message').text('Could not find weather for \'' + searchterm + '\'');
-    $('.new .error-message').removeClass('hidden');
+    $('#searchterm').addClass('form-error');
+    $('#new #error-message').text('Could not find weather for \'' + searchterm + '\'');
+    $('#new #error-message').removeClass('hidden');
 }
 
 function hideInputError() {
-    $('input#new-city').removeClass('form-error');
-    $('input#new-city').val('');
-    $('.new .error-message').addClass('hidden');
-    $('.new').removeClass('selected');
+    $('#searchterm').removeClass('form-error');
+    $('#searchterm').val('');
+    $('#new #error-message').addClass('hidden');
+    $('#new').removeClass('selected');
 }
 
 function adjustnext(n) {
@@ -274,11 +281,9 @@ function attemptAddCity(searchurl, onsuccess, onerror) {
     // TODO: figure out how to resolve conflicts when multiple cities returned
     // Idea: seems to be duplication at the google api level, so maybe create a set of unique canonical id's, and then ask user to resolve?
     $.get(searchurl, function(data) {
-        //var address_components = null;
         var formatted_address = null;
         for (var i = 0; i < data.results.length; i++) {
             if (data.results[i].types.indexOf('locality') != -1) {
-                //address_components = data.results[i].address_components;
                 formatted_address = data.results[i].formatted_address;
                 break;
             }
@@ -287,25 +292,14 @@ function attemptAddCity(searchurl, onsuccess, onerror) {
         if (!formatted_address) {
             if (onerror !== undefined && onerror !== null)
                 onerror();
+            return;
         }
-
-        /*
-        for (var j = 0; j < address_components.length; j++) {
-            if (address_components[j].types.indexOf('locality') != -1) {
-                city_long = address_components[j].long_name;
-                city_short = address_components[j].short_name;
-            }
-            if (address_components[j].types.indexOf('country') != -1) {
-                country_long = address_components[j].long_name;
-                country_short = address_components[j].short_name;
-            }
-        }*/
 
         getWeatherData(formatted_address, function(current_condition, forecast) {
             var city = addCity(formatted_address);
             addWeatherData(city, current_condition, forecast);
             if (onsuccess !== undefined && onsuccess !== null)
-                onsuccess();
+                onsuccess(city);
         }, onerror);
     }, 'json');
 }
@@ -340,11 +334,15 @@ function attemptAddCurrentLocation() {
     navigator.geolocation.getCurrentPosition(
         function(position) {
             var searchurl = base_geolocation_url + position.coords.latitude + ',' + position.coords.longitude;
-            attemptAddCity(searchurl, null, function() {
-                console.log("Could not add city using geolocation");
-                if (cities.length() === 0)
-                    showSettings();
-            });
+            attemptAddCity(searchurl,
+                function(city) {
+                    selectCity(city);
+                },
+                function() {
+                    console.log("Could not add city using geolocation");
+                    if (cities.length() === 0)
+                        showSettings();
+                });
         },
         function(error) {
             console.log("Geocoder failed");
@@ -361,7 +359,7 @@ function refresh() {
     cities.sortedByKey('date').forEach(function(city) {
         if (weather_data.hasOwnProperty(city.id)) {
             var w = weather_data[city.id];
-            addLocationDisplay(city, w.current_condition, w.forecast);
+            updateCityDisplay(city, w.current_condition, w.forecast);
         }
     });
 }
@@ -379,7 +377,7 @@ function setDots() {
         var i = index % num_dots_at_bottom;
         var first = index - i;
         for (var l = first; l < first + num_dots_at_bottom && l < c.length; l++)
-            $('#dots .dot.' + c[l].id).addClass('shown');
+            $('#dots .dot[city=' + c[l].id + ']').addClass('shown');
 
         if (first === 0)
             $('#dots #prev').removeClass('shown').addClass('disabled');
@@ -394,34 +392,54 @@ function setDots() {
     }
 }
 
-function addLocationDisplay(city, current_condition, forecast) {
-    // First, remove old city data
-    $('.' + city.id).remove();
+function updateCityDisplay(city, current_condition, forecast) {
+    // remove old city elements
+    $('[city=' + city.id + ']').remove();
 
+    var forecast_div = document.createElement('div');
     var description = condition_codes[current_condition.weatherCode];
-    var forecast_html = '<div class="forecast ' + city.id + ' ' + description + '"></div>';
-    var dot_html = '<div class="dot ' + city.id + '" title="' + city.id + '"></div>';
-    var city_html = '<div class="city">' + city.address + '</div>';
-    var cities_list_html = '<div class="city-list ' + city.id + '"><div class="delete"></div>' + city.address + '</div>';
-    var current_html = currentDisplay(current_condition);
+    forecast_div.className = 'forecast ' + description;
+    forecast_div.setAttribute('city', city.id);
+    $('#weather').append(forecast_div);
+
+    forecast_div.appendChild(currentDisplay(current_condition));
+
     var tempMax = forecast[0]['tempMax' + temp];
     var tempMin = forecast[0]['tempMin' + temp];
-    var high_low = '<div class="high_low">' + tempMax + '&deg; / ' + tempMin + '&deg;</div>';
+    var high_low_div = document.createElement('div');
+    high_low_div.className = 'high_low';
+    high_low_div.appendChild(document.createTextNode(tempMax + '\u00B0 / ' + tempMin + '\u00B0')); // &deg;
+    forecast_div.appendChild(high_low_div);
+
+    var city_div = document.createElement('div');
+    city_div.className = 'city';
+    city_div.appendChild(document.createTextNode(city.address));
+    forecast_div.appendChild(city_div);
+
+    /*
     var day_html = '';
-    // TODO: remplace this with forecast.map(dayDisplay).join or reduce or forEach
-    for (var i = 0; i < forecast.length; i++) {
-        day_html += dayDisplay(forecast, i);
-    }
+    forecast.splice(1,4).forEach(function(forecast_day, i) {
+        day_html += dayDisplay(forecast_day, i);
+    });
+    $(forecast_div).append(day_html);
+    */
 
-    // update the UI
-    $('#settings .cities-list').append(cities_list_html);
-    $('#weather').append(forecast_html);
-    $('#weather .' + city.id).append(current_html);
-    $('#weather .' + city.id).append(high_low);
-    $('#weather .' + city.id).append(city_html);
-    //$('#weather .' + city.id).append(day_html);
-    $('#dots #next').before(dot_html); // TODO: instead of always append-to-end, should add in sorted order
+    var city_list_div = document.createElement('div');
+    city_list_div.className = 'city-list';
+    city_list_div.setAttribute('city', city.id);
+    var delete_div = document.createElement('div');
+    delete_div.className = 'delete';
+    city_list_div.appendChild(delete_div);
+    city_list_div.appendChild(document.createTextNode(city.address));
+    $('#settings #cities-list').append(city_list_div);
 
+    var dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.setAttribute('city', city.id);
+    dot.setAttribute('title', city.id);
+    $('#dots #next').before(dot);
+
+    // TODO: find a way to remove the need for this
     if (city === getCurrentCity())
         selectCity(city);
 
@@ -440,27 +458,32 @@ function addLocationDisplay(city, current_condition, forecast) {
 
 function currentDisplay(current_condition) {
     var current_temp = current_condition['temp_' + temp];
-    var current_description = current_condition.weatherDes/[0].value;
+    var current_description = current_condition.weatherDesc[0].value;
     var current_icon = condition_codes[current_condition.weatherCode];
-    var html = '<div class="current">' +
-                                '<div class="current-temp">' + current_temp + '</div>' +
-                                '<div class="current-icon ' + current_icon + '" title="' + current_description + '"></div>' +
-                            '</div>';
-    return html;
+    var current_div = document.createElement('div');
+    current_div.className = 'current';
+    var current_temp_div = document.createElement('div');
+    current_temp_div.className = 'current-temp';
+    current_temp_div.appendChild(document.createTextNode(current_temp));
+    var current_icon_div = document.createElement('div');
+    current_icon_div.className = 'current-icon ' + current_icon;
+    current_icon_div.setAttribute('title', current_description);
+    current_div.appendChild(current_temp_div);
+    current_div.appendChild(current_icon_div);
+    return current_div;
 }
 
-function dayDisplay(forecast, i) {
-    var day_data = forecast[i];
-    var day_condition = condition_codes[day_data.weatherCode];
-    var day_description = day_data.weatherDesc[0].value;
-    var date = day_data.date.split('-');
-    var day = days[((new Date().getDay() + i) % 7)][0];
-    var html = '<div class="day"' + i + '">' +
+function dayDisplay(forecast_day, i) {
+    var day_condition = condition_codes[forecast_day.weatherCode];
+    var day_description = forecast_day.weatherDesc[0].value;
+    var date = forecast_day.date.split('-');
+    var day = days[((new Date().getDay() + i) % 7)];
+    var html = '<div class="day' + i + '">' +
                                 '<div class="date">' + day + '</div>' +
                                 '<div class="icon ' + day_condition + '"' +
                                         ' title="' + day_description + '"></div>' +
-                                '<div class="high">' + day_data['tempMax' + temp] + '&deg;</div>' +
-                                '<div class="low">' + day_data['tempMin' + temp] + '&deg;</div>' +
+                                '<div class="high">' + forecast_day['tempMax' + temp] + '&deg;</div>' +
+                                '<div class="low">' + forecast_day['tempMin' + temp] + '&deg;</div>' +
                             '</div>';
     return html;
 }
@@ -471,7 +494,7 @@ function dayDisplay(forecast, i) {
 // init
 
 function initHandlers() {
-    $('.close').click(function() {
+    $('#close').click(function() {
         window.close();
     });
 
@@ -482,32 +505,36 @@ function initHandlers() {
         updateAllWeatherData();
     });
 
+    // TODO: remove the use of jQuery live()
     $('#dots .dot').live('click', function() {
-        // TODO fix this up
-        var id = $(this).attr('class').split(' ')[1];
+        var id = this.getAttribute('city');
         selectCity(cities.findById(id));
     });
     
     $('.delete').live('click', function() {
-        var id = $(this).parent().attr('class').split(' ')[1];
+        var id = this.parentElement.getAttribute('city');
         deleteCity(cities.findById(id));
     });
 
-    $('.new .add').click(function() {
-        var searchterm = $('#new-city').val();
+    $('#new #add').click(function() {
+        var searchterm = $('#searchterm').val();
         var searchurl = base_searchterm_url + searchterm;
         // TODO: this will call onerror asyncronously -- should disable textbox during that time?
-        attemptAddCity(searchurl, hideInputError, showInputError.bind(null, searchterm));
+        attemptAddCity(searchurl,
+            function(city) {
+                hideInputError();
+                selectCity(city);
+            }, showInputError.bind(null, searchterm));
     });
     
-    $('#new-city').keyup(function(e) {
+    $('#searchterm').keyup(function(e) {
         if (event.which == 13) // enter
-            $('.new .add').click();
+            $('#new #add').click();
         if (event.which == 27) // esc
-            $('.new .cancel').click();
+            $('#new #cancel').click();
     });
     
-    $('.new .cancel').click(function() {
+    $('#new #cancel').click(function() {
         hideSettings();
     });
 
@@ -574,7 +601,6 @@ $(document).ready(function() {
                 city.__proto__ = City.prototype;
                 city.date = new Date(city.date);
             });
-            current_city = items.current_city;
         } else {
             cities = new Cities();
         }
