@@ -11,7 +11,11 @@
 
 const num_dots_at_bottom = 4;
 const base_weather_url = 'http://free.worldweatheronline.com/feed/weather.ashx?format=json&num_of_days=5&key=78b33b52eb213218120708&q=';
-const base_city_url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&latlng=';
+const base_geolocation_url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=true&language=EN&latlng=';
+const base_searchterm_url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&language=EN&address=';
+// Samples:
+// http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=kingston
+// http://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=43.480926,-80.53766399999999
 
 const days = {
     0 : 'Sunday',
@@ -79,11 +83,14 @@ const condition_codes = {
 /******************************************************************************/
 // "model"
 
-function City(id, searchterm) {
-    // TODO: remove id/searchterm and just have one canonical id (paris, canada vs paris, france etc)
-    this.id = id;
-    this.searchterm = searchterm;
+function City(address) {
+    this.id = City.ConvertAddressDomFriendly(address);
+    this.address = address;
     this.date = new Date();
+}
+
+City.ConvertAddressDomFriendly = function(address) {
+    return address.toLowerCase().replace(/,/g , "-").split(' ').join('-');
 }
 
 function Cities() {
@@ -91,7 +98,7 @@ function Cities() {
     this.version = Cities.CurrentVersion;
 }
 
-Cities.prototype.CurrentVersion = 2;
+Cities.CurrentVersion = 2;
 
 Cities.prototype.sync = function() {
     this.cities.forEach(function(city) {
@@ -173,6 +180,8 @@ function selectCity(city) {
         return;
 
     current_city = city.id;
+    // TODO Perhaps don't sync the current city..
+    // First, because it spams sync server, but more importantly, because we should default to current location on app start
     chrome.storage.sync.set({current_city: current_city});
     
     $('.forecast').removeClass('selected');
@@ -191,12 +200,12 @@ function deleteCity(city) {
     selectCity(getCurrentCity());
 }
 
-function addCity(searchterm) {
-    var id = searchterm.split(', ')[0].toLowerCase().split(' ').join('-');
+function addCity(address) {
+    var id = City.ConvertAddressDomFriendly(address);
     var city = cities.findById(id);
     if (city != null)
         return city;
-    city = new City(id, searchterm);
+    city = new City(address);
     cities.add(city);
     selectCity(city);
     return city;
@@ -261,80 +270,86 @@ function adjustprev(n) {
     selectCity(newCity);
 }
 
-function attemptAddCity(searchterm, onsuccess, onerror) {
-    getWeatherData(searchterm, function(searchterm, current_condition, forecast) {
-        var city = addCity(searchterm);
-        addWeatherData(city, current_condition, forecast);
-        if (onsuccess !== undefined)
-            onsuccess();
-    }, onerror);
+function attemptAddCity(searchurl, onsuccess, onerror) {
+    // TODO: figure out how to resolve conflicts when multiple cities returned
+    // Idea: seems to be duplication at the google api level, so maybe create a set of unique canonical id's, and then ask user to resolve?
+    $.get(searchurl, function(data) {
+        //var address_components = null;
+        var formatted_address = null;
+        for (var i = 0; i < data.results.length; i++) {
+            if (data.results[i].types.indexOf('locality') != -1) {
+                //address_components = data.results[i].address_components;
+                formatted_address = data.results[i].formatted_address;
+                break;
+            }
+        }
+
+        if (!formatted_address) {
+            if (onerror !== undefined && onerror !== null)
+                onerror();
+        }
+
+        /*
+        for (var j = 0; j < address_components.length; j++) {
+            if (address_components[j].types.indexOf('locality') != -1) {
+                city_long = address_components[j].long_name;
+                city_short = address_components[j].short_name;
+            }
+            if (address_components[j].types.indexOf('country') != -1) {
+                country_long = address_components[j].long_name;
+                country_short = address_components[j].short_name;
+            }
+        }*/
+
+        getWeatherData(formatted_address, function(current_condition, forecast) {
+            var city = addCity(formatted_address);
+            addWeatherData(city, current_condition, forecast);
+            if (onsuccess !== undefined && onsuccess !== null)
+                onsuccess();
+        }, onerror);
+    }, 'json');
 }
 
-function getWeatherData(searchterm, onsuccess, onerror) {
-    var url = encodeURI(base_weather_url + searchterm);
+function getWeatherData(address, onsuccess, onerror) {
+    var url = encodeURI(base_weather_url + address);
     $.get(url, function(data) {
         if (!data.data.error) {
             var current_condition = data.data.current_condition[0];
             var forecast = data.data.weather;
-            if (onsuccess !== undefined)
-                onsuccess(searchterm, current_condition, forecast);
+            if (onsuccess !== undefined && onsuccess !== null)
+                onsuccess(current_condition, forecast);
         } else {
-            if (onerror !== undefined)
-                onerror(searchterm);
+            if (onerror !== undefined && onerror !== null)
+                onerror();
         }
     }, 'json');
 };
 
 function updateAllWeatherData() {
     cities.asArray().forEach(function(city) {
-        getWeatherData(city.searchterm,
-            function(searchterm, current_condition, forecast) {
+        getWeatherData(city.address,
+            function(current_condition, forecast) {
                 addWeatherData(city, current_condition, forecast);
-            }, function(searchterm) {
-                //TODO: handle error?
-            });
+            }, null); // TODO: handle error?
     });
 }
 
-/******************************************************************************/
-/******************************************************************************/
-/******************************************************************************/
-// current geolocation
-
-function getCurrentPosSuccessFunction(position) {
-    var lat = position.coords.latitude;
-    var lng = position.coords.longitude;
-    var url = base_city_url + lat + ',' + lng;
-
-    $.get(url, function(data) {
-        var address_components = null;
-        for (var i = 0; i < data.results.length; i++) {
-            var component_types = data.results[i].types;
-            if ((component_types.indexOf('street_address') != -1) || (component_types.indexOf('locality') != -1)) {
-                address_components = data.results[i].address_components;
-                break;
-            }
-        }
-
-        if (!address_components)
-            return;
-
-        var city = '';
-        var country = '';
-        for (var j = 0; j < address_components.length; j++) {
-            if (address_components[j].types.indexOf('locality') != -1)
-                city = address_components[j].long_name;
-            if (address_components[j].types.indexOf('country') != -1)
-                country = address_components[j].short_name;
-        }
-
-        attemptAddCity(city + ', ' + country);
-    }, 'json');
-}
-
-function getCurrentPosErrorFunction(error) {
-    console.log("Geocoder failed");
-    showSettings();
+function attemptAddCurrentLocation() {
+    // TODO: we always permanentally add your current location.  Should keep a history of all places, but only display "pinned" places
+    // and the current location
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            var searchurl = base_geolocation_url + position.coords.latitude + ',' + position.coords.longitude;
+            attemptAddCity(searchurl, null, function() {
+                console.log("Could not add city using geolocation");
+                if (cities.length() === 0)
+                    showSettings();
+            });
+        },
+        function(error) {
+            console.log("Geocoder failed");
+            showSettings();
+        }); 
 }
 
 /******************************************************************************/
@@ -386,8 +401,8 @@ function addLocationDisplay(city, current_condition, forecast) {
     var description = condition_codes[current_condition.weatherCode];
     var forecast_html = '<div class="forecast ' + city.id + ' ' + description + '"></div>';
     var dot_html = '<div class="dot ' + city.id + '" title="' + city.id + '"></div>';
-    var city_html = '<div class="city">' + city.id.toUpperCase() + '</div>';
-    var cities_list_html = '<div class="city-list ' + city.id + '"><div class="delete"></div>' + city.searchterm + '</div>';
+    var city_html = '<div class="city">' + city.address + '</div>';
+    var cities_list_html = '<div class="city-list ' + city.id + '"><div class="delete"></div>' + city.address + '</div>';
     var current_html = currentDisplay(current_condition);
     var tempMax = forecast[0]['tempMax' + temp];
     var tempMin = forecast[0]['tempMin' + temp];
@@ -480,7 +495,9 @@ function initHandlers() {
 
     $('.new .add').click(function() {
         var searchterm = $('#new-city').val();
-        attemptAddCity(searchterm, hideInputError, showInputError.bind(null, searchterm));
+        var searchurl = base_searchterm_url + searchterm;
+        // TODO: this will call onerror asyncronously -- should disable textbox during that time?
+        attemptAddCity(searchurl, hideInputError, showInputError.bind(null, searchterm));
     });
     
     $('#new-city').keyup(function(e) {
@@ -565,8 +582,9 @@ $(document).ready(function() {
         if (!temp) temp = 'F';
         $('input[name="temp-type"].' + temp).attr('checked', true);
         updateAllWeatherData();
-        navigator.geolocation.getCurrentPosition(getCurrentPosSuccessFunction, getCurrentPosErrorFunction);
     });
+
+    attemptAddCurrentLocation();
 
     initHandlers();
 
