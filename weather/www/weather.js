@@ -586,7 +586,7 @@ function initHandlers() {
             hideSettings();
         else
             window.navigator.app.exitApp();
-    }, false);     
+    }, false);
 }
 
 $(document).ready(function() {
