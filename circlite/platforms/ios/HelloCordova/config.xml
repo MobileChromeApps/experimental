@@ -53,7 +53,8 @@
         <plugin name="Battery" value="CDVBattery" />
         <plugin name="Globalization" value="CDVGlobalization" />
         <plugin name="InAppBrowser" value="CDVInAppBrowser" />
-    </plugins>
+        <plugin name="Socket" value="Socket" />
+</plugins>
 
     <access origin="*" />
 </cordova>
