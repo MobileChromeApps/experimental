@@ -1,2 +1,5 @@
 calculator_android/bin/*
 *.class
+weather/android/bin/*
+
+.DS_Store
