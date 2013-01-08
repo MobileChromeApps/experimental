@@ -197,7 +197,7 @@ function selectCity(city) {
 
   refreshIScroll();
   var index = cities.ordered().indexOf(getCurrentCity());
-  if (myScroll.currPageX != index)
+  if (myScroll && myScroll.currPageX != index)
     myScroll.scrollToPage(index);
 
   setDots();
@@ -241,6 +241,8 @@ function currentlyOnSettingsPage() {
 }
 
 function refreshIScroll() {
+  if (!myScroll)
+    return;
   myScroll.refresh();
   /*
   setTimeout(function() {
