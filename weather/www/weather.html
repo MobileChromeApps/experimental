@@ -5,19 +5,19 @@
         <link rel="stylesheet" type="text/css" href="style.css" />
 
         <script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
-        <script type="text/javascript" src="lib/jquery.mobile-1.2.0.min.js"></script>
         <script type="text/javascript" src="lib/iscroll.js"></script>
         <script type="text/javascript" src="weather.js"></script>
     </head>
 
     <body>
         <div id="close"></div>
-        <div id="info"></div>
+        <div id="settingsToggle"></div>
 
         <div id="settings" class="hidden">
             <div id="source">
                 Powered by <a href="http://www.worldweatheronline.com/" title="Free local weather content provider" target="blank">World Weather Online</a>
             </div>
+
             <div id="new">
                 <input id="searchterm" type="text" /><br>
                 <div id="error-message" class="hidden"></div>
@@ -31,7 +31,9 @@
             <div id="cities-list"></div>
         </div>
 
-        <div id="weather"></div>
+        <div id="wrapper">
+          <div id="weather"></div>
+        </div>
 
         <div id="dots">
             <div id="prev"></div>

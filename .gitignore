@@ -3,3 +3,5 @@ calculator_android/bin/*
 weather/android/bin/*
 
 .DS_Store
+xcuserdata
+project.xcworkspace
