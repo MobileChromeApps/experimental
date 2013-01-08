@@ -572,20 +572,6 @@ function initHandlers() {
     adjustprev(num_dots_at_bottom);
   });
 
-  /*
-  $(document).bind('swipeleft', function() {
-    if (currentlyOnSettingsPage())
-      return;
-    adjustnext(1);
-  });
-
-  $(document).bind('swiperight', function() {
-    if (currentlyOnSettingsPage())
-      return;
-    adjustprev(1);
-  });
-  */
-
   $(document).keyup(function(event) {
     if (currentlyOnSettingsPage())
       return;
@@ -647,6 +633,10 @@ $(document).ready(function() {
     hScrollbar: false,
     vScrollbar: false,
     onScrollEnd: function () {
+      var city = cities.ordered()[this.currPageX];
+      selectCity(city);
+    },
+    onTouchEnd: function () {
       var city = cities.ordered()[this.currPageX];
       selectCity(city);
     }
