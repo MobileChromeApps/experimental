@@ -3,7 +3,7 @@ html, body {
   height: 100%;
   margin: 0px;
   padding: 0px;
-  /*-webkit-app-region: drag;*/
+  -webkit-app-region: drag;
   color: #fff;
   font-family: "Quicksand", "Open Sans", sans-serif;
   font-size: 13px;
@@ -35,20 +35,20 @@ a, #dots div {
 }
 
 .not-mobile #close {
-  background-image: url('img/x.png');
-  background-repeat: no-repeat;
+  background: url('img/x.png') center no-repeat;
+  background-size: 10px 10px;
   position: absolute;
-  top: 5px;
-  left: 5px;
-  z-index: 1000;
-  width: 17px;
-  height: 17px;
+  top: 0px;
+  left: 0px;
+  height: 30px;
+  width: 30px;
   cursor: pointer;
   -webkit-app-region: no-drag;
+  z-index: 100;
   visibility: hidden;
 }
 
-.not-mobile body:hover #close {
+body:hover.not-mobile #close {
   visibility: visible;
 }
 
@@ -285,13 +285,12 @@ input[type=text].form-error{
 
 #settingsToggle {
   background: url('img/settings.png') center no-repeat;
-  background-size: 16px 16px;
+  background-size: 14px 14px;
   position: absolute;
   top: 0px;
   right: 0px;
   cursor: pointer;
   height: 40px;
-  padding: 2px;
   width: 40px;
   -webkit-app-region: no-drag;
   z-index: 100;
@@ -303,6 +302,7 @@ input[type=text].form-error{
   position:absolute;
   white-space: nowrap;
   overflow: hidden;
+  -webkit-box-sizing: border-box;
 }
 
 #weather {
