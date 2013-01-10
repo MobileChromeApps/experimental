@@ -243,12 +243,9 @@ function currentlyOnSettingsPage() {
 function refreshIScroll() {
   if (!myScroll)
     return;
-  myScroll.refresh();
-  /*
   setTimeout(function() {
     myScroll.refresh();
   }, 0);
-  */
 }
 
 function hideSettings() {
