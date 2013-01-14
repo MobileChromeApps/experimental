@@ -41,6 +41,9 @@
 		30A0434914DC770100060A13 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 30A0434614DC770100060A13 /* Localizable.strings */; };
 		30E5649213A7FCAF007403D8 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30E5649113A7FCAF007403D8 /* CoreMedia.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		54865C30167A3C9400413241 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54865C2F167A3C9400413241 /* Security.framework */; };
+		5496ACCD16A4B0B4005FF6A9 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 5496ACCA16A4B0B4005FF6A9 /* GCDAsyncSocket.m */; };
+		5496ACCE16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 5496ACCC16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.m */; };
+		54DE26D5169F680D002F3934 /* Socket.m in Sources */ = {isa = PBXBuildFile; fileRef = 54DE26D4169F680D002F3934 /* Socket.m */; };
 		D4A0D8761607E02300AEF8BB /* Default-568h@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */; };
 		F840E1F1165FE0F500CFE078 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = F840E1F0165FE0F500CFE078 /* config.xml */; };
 /* End PBXBuildFile section */
@@ -101,6 +104,12 @@
 		30E5649113A7FCAF007403D8 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		32CA4F630368D1EE00C91783 /* MobileCircLite-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MobileCircLite-Prefix.pch"; sourceTree = "<group>"; };
 		54865C2F167A3C9400413241 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		5496ACC916A4B0B4005FF6A9 /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDAsyncSocket.h; path = "../../../chrome-cordova/plugins/third_party/GCDAsyncSocket.h"; sourceTree = "<group>"; };
+		5496ACCA16A4B0B4005FF6A9 /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncSocket.m; path = "../../../chrome-cordova/plugins/third_party/GCDAsyncSocket.m"; sourceTree = "<group>"; };
+		5496ACCB16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDAsyncUdpSocket.h; path = "../../../chrome-cordova/plugins/third_party/GCDAsyncUdpSocket.h"; sourceTree = "<group>"; };
+		5496ACCC16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncUdpSocket.m; path = "../../../chrome-cordova/plugins/third_party/GCDAsyncUdpSocket.m"; sourceTree = "<group>"; };
+		54DE26D3169F680D002F3934 /* Socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Socket.h; path = "../../../../chrome-cordova/plugins/socket/Socket.h"; sourceTree = "<group>"; };
+		54DE26D4169F680D002F3934 /* Socket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Socket.m; path = "../../../../chrome-cordova/plugins/socket/Socket.m"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* MobileCircLite-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "MobileCircLite-Info.plist"; path = "../MobileCircLite-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x~iphone.png"; sourceTree = "<group>"; };
 		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = MobileCircLite/config.xml; sourceTree = "<group>"; };
@@ -189,6 +198,10 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				5496ACC916A4B0B4005FF6A9 /* GCDAsyncSocket.h */,
+				5496ACCA16A4B0B4005FF6A9 /* GCDAsyncSocket.m */,
+				5496ACCB16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.h */,
+				5496ACCC16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.m */,
 				32CA4F630368D1EE00C91783 /* MobileCircLite-Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
@@ -244,6 +257,8 @@
 		307C750510C5A3420062BCA9 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
+				54DE26D3169F680D002F3934 /* Socket.h */,
+				54DE26D4169F680D002F3934 /* Socket.m */,
 			);
 			name = Plugins;
 			path = MobileCircLite/Plugins;
@@ -398,7 +413,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "exec ${PROJECT_DIR}/../../chrome-cordova/integration/iosbuildstep.sh \"/Users/mmocny/dev/circ/package/\" \"/Users/mmocny/dev/cordova/incubator-cordova-js/pkg/\"";
+			shellScript = "exec ${PROJECT_DIR}/../../chrome-cordova/integration/iosbuildstep.sh \"/Users/mmocny/dev/circ/package/\" \"/Users/mmocny/dev/cordova/cordova-js/pkg/\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -410,6 +425,9 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* AppDelegate.m in Sources */,
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
+				54DE26D5169F680D002F3934 /* Socket.m in Sources */,
+				5496ACCD16A4B0B4005FF6A9 /* GCDAsyncSocket.m in Sources */,
+				5496ACCE16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
