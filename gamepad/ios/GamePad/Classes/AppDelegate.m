@@ -19,7 +19,7 @@
 
 //
 //  AppDelegate.m
-//  MobileCircLite
+//  GamePad
 //
 //  Created by ___FULLUSERNAME___ on ___DATE___.
 //  Copyright ___ORGANIZATIONNAME___ ___YEAR___. All rights reserved.
@@ -47,7 +47,7 @@
     return self;
 }
 
-#pragma UIApplicationDelegate implementation
+#pragma mark UIApplicationDelegate implementation
 
 /**
  * This is main kick off after the app inits, the views and Settings are setup here. (preferred - iOS4 and up)
@@ -61,8 +61,10 @@
 
     self.viewController = [[MainViewController alloc] init];
     self.viewController.useSplashScreen = NO;
-    self.viewController.wwwFolderName = @"www";
-    self.viewController.startPage = @"chromeapp.html";
+
+    // Set your app's start page by setting the <content src='foo.html' /> tag in config.xml.
+    // If necessary, uncomment the line below to override it.
+    // self.viewController.startPage = @"index.html";
 
     // NOTE: To customize the view's frame size (which defaults to full screen), override
     // [self.viewController viewWillAppear:] in your view controller.
@@ -74,7 +76,7 @@
 }
 
 // this happens while we are running ( in the background, or from within our own app )
-// only valid if MobileCircLite-Info.plist specifies a protocol to handle
+// only valid if GamePad-Info.plist specifies a protocol to handle
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url
 {
     if (!url) {
@@ -92,8 +94,8 @@
 }
 
 // repost the localnotification using the default NSNotificationCenter so multiple plugins may respond
-- (void)application:(UIApplication *)application
-didReceiveLocalNotification:(UILocalNotification *)notification
+- (void)           application:(UIApplication*)application
+   didReceiveLocalNotification:(UILocalNotification*)notification
 {
     // re-post ( broadcast )
     [[NSNotificationCenter defaultCenter] postNotificationName:CDVLocalNotification object:notification];

@@ -40,10 +40,9 @@
 		30A0434814DC770100060A13 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 30A0434314DC770100060A13 /* Localizable.strings */; };
 		30A0434914DC770100060A13 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 30A0434614DC770100060A13 /* Localizable.strings */; };
 		30E5649213A7FCAF007403D8 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30E5649113A7FCAF007403D8 /* CoreMedia.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		54865C30167A3C9400413241 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54865C2F167A3C9400413241 /* Security.framework */; };
-		5496ACCD16A4B0B4005FF6A9 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 5496ACCA16A4B0B4005FF6A9 /* GCDAsyncSocket.m */; };
-		5496ACCE16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 5496ACCC16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.m */; };
-		5496ADE716AF17E5005FF6A9 /* ChromeSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 5496ADE616AF17E5005FF6A9 /* ChromeSocket.m */; };
+		5496ADCE16AEFF21005FF6A9 /* ChromeSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 5496ADCD16AEFF21005FF6A9 /* ChromeSocket.m */; };
+		5496ADD316AEFF2C005FF6A9 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 5496ADD016AEFF2C005FF6A9 /* GCDAsyncSocket.m */; };
+		5496ADD416AEFF2C005FF6A9 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 5496ADD216AEFF2C005FF6A9 /* GCDAsyncUdpSocket.m */; };
 		D4A0D8761607E02300AEF8BB /* Default-568h@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */; };
 		F840E1F1165FE0F500CFE078 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = F840E1F0165FE0F500CFE078 /* config.xml */; };
 /* End PBXBuildFile section */
@@ -69,13 +68,13 @@
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		1D6058910D05DD3D006BFB54 /* MobileCircLite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MobileCircLite.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D6058910D05DD3D006BFB54 /* GamePad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GamePad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		1F766FDD13BBADB100FB74C0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localizable.strings; sourceTree = "<group>"; };
 		1F766FE013BBADB100FB74C0 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = Localizable.strings; sourceTree = "<group>"; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		301BF52D109A57CC0062928A /* CordovaLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CordovaLib.xcodeproj; path = "../../../cordova/incubator-cordova-ios/CordovaLib/CordovaLib.xcodeproj"; sourceTree = "<group>"; };
+		301BF52D109A57CC0062928A /* CordovaLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CordovaLib.xcodeproj; path = "../../../../cordova/cordova-ios/CordovaLib/CordovaLib.xcodeproj"; sourceTree = "<group>"; };
 		301BF5B4109A6A2B0062928A /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		301BF5B6109A6A2B0062928A /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
 		301BF5B8109A6A2B0062928A /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -102,17 +101,16 @@
 		30A0434414DC770100060A13 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = Localizable.strings; sourceTree = "<group>"; };
 		30A0434714DC770100060A13 /* se */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = se; path = Localizable.strings; sourceTree = "<group>"; };
 		30E5649113A7FCAF007403D8 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
-		32CA4F630368D1EE00C91783 /* MobileCircLite-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MobileCircLite-Prefix.pch"; sourceTree = "<group>"; };
-		54865C2F167A3C9400413241 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
-		5496ACC916A4B0B4005FF6A9 /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDAsyncSocket.h; path = "../../../chrome-cordova/plugins/third_party/GCDAsyncSocket.h"; sourceTree = "<group>"; };
-		5496ACCA16A4B0B4005FF6A9 /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncSocket.m; path = "../../../chrome-cordova/plugins/third_party/GCDAsyncSocket.m"; sourceTree = "<group>"; };
-		5496ACCB16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDAsyncUdpSocket.h; path = "../../../chrome-cordova/plugins/third_party/GCDAsyncUdpSocket.h"; sourceTree = "<group>"; };
-		5496ACCC16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncUdpSocket.m; path = "../../../chrome-cordova/plugins/third_party/GCDAsyncUdpSocket.m"; sourceTree = "<group>"; };
-		5496ADE516AF17E5005FF6A9 /* ChromeSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChromeSocket.h; path = "../../../../chrome-cordova/plugins/socket/ChromeSocket.h"; sourceTree = "<group>"; };
-		5496ADE616AF17E5005FF6A9 /* ChromeSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ChromeSocket.m; path = "../../../../chrome-cordova/plugins/socket/ChromeSocket.m"; sourceTree = "<group>"; };
-		8D1107310486CEB800E47090 /* MobileCircLite-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "MobileCircLite-Info.plist"; path = "../MobileCircLite-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		32CA4F630368D1EE00C91783 /* GamePad-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GamePad-Prefix.pch"; sourceTree = "<group>"; };
+		5496ADCC16AEFF21005FF6A9 /* ChromeSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChromeSocket.h; path = "../../../../../chrome-cordova/plugins/socket/ChromeSocket.h"; sourceTree = "<group>"; };
+		5496ADCD16AEFF21005FF6A9 /* ChromeSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ChromeSocket.m; path = "../../../../../chrome-cordova/plugins/socket/ChromeSocket.m"; sourceTree = "<group>"; };
+		5496ADCF16AEFF2C005FF6A9 /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDAsyncSocket.h; path = "../../../../chrome-cordova/plugins/third_party/GCDAsyncSocket.h"; sourceTree = "<group>"; };
+		5496ADD016AEFF2C005FF6A9 /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncSocket.m; path = "../../../../chrome-cordova/plugins/third_party/GCDAsyncSocket.m"; sourceTree = "<group>"; };
+		5496ADD116AEFF2C005FF6A9 /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDAsyncUdpSocket.h; path = "../../../../chrome-cordova/plugins/third_party/GCDAsyncUdpSocket.h"; sourceTree = "<group>"; };
+		5496ADD216AEFF2C005FF6A9 /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncUdpSocket.m; path = "../../../../chrome-cordova/plugins/third_party/GCDAsyncUdpSocket.m"; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* GamePad-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GamePad-Info.plist"; path = "../GamePad-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x~iphone.png"; sourceTree = "<group>"; };
-		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = MobileCircLite/config.xml; sourceTree = "<group>"; };
+		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = GamePad/config.xml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,7 +118,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				54865C30167A3C9400413241 /* Security.framework in Frameworks */,
 				301BF552109A68D80062928A /* libCordova.a in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
@@ -152,13 +149,13 @@
 				1D3623250D0F684500981E51 /* AppDelegate.m */,
 			);
 			name = Classes;
-			path = MobileCircLite/Classes;
+			path = GamePad/Classes;
 			sourceTree = SOURCE_ROOT;
 		};
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D6058910D05DD3D006BFB54 /* MobileCircLite.app */,
+				1D6058910D05DD3D006BFB54 /* GamePad.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -182,7 +179,6 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				54865C2F167A3C9400413241 /* Security.framework */,
 				F840E1F0165FE0F500CFE078 /* config.xml */,
 				301BF52D109A57CC0062928A /* CordovaLib.xcodeproj */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -198,15 +194,15 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
-				5496ACC916A4B0B4005FF6A9 /* GCDAsyncSocket.h */,
-				5496ACCA16A4B0B4005FF6A9 /* GCDAsyncSocket.m */,
-				5496ACCB16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.h */,
-				5496ACCC16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.m */,
-				32CA4F630368D1EE00C91783 /* MobileCircLite-Prefix.pch */,
+				5496ADCF16AEFF2C005FF6A9 /* GCDAsyncSocket.h */,
+				5496ADD016AEFF2C005FF6A9 /* GCDAsyncSocket.m */,
+				5496ADD116AEFF2C005FF6A9 /* GCDAsyncUdpSocket.h */,
+				5496ADD216AEFF2C005FF6A9 /* GCDAsyncUdpSocket.m */,
+				32CA4F630368D1EE00C91783 /* GamePad-Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
 			name = "Other Sources";
-			path = MobileCircLite;
+			path = GamePad;
 			sourceTree = "<group>";
 		};
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
@@ -219,10 +215,10 @@
 				3072F99613A8081B00425683 /* Capture.bundle */,
 				308D052D1370CCF300D202BF /* icons */,
 				308D05311370CCF300D202BF /* splash */,
-				8D1107310486CEB800E47090 /* MobileCircLite-Info.plist */,
+				8D1107310486CEB800E47090 /* GamePad-Info.plist */,
 			);
 			name = Resources;
-			path = MobileCircLite/Resources;
+			path = GamePad/Resources;
 			sourceTree = "<group>";
 		};
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
@@ -257,11 +253,11 @@
 		307C750510C5A3420062BCA9 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
-				5496ADE516AF17E5005FF6A9 /* ChromeSocket.h */,
-				5496ADE616AF17E5005FF6A9 /* ChromeSocket.m */,
+				5496ADCC16AEFF21005FF6A9 /* ChromeSocket.h */,
+				5496ADCD16AEFF21005FF6A9 /* ChromeSocket.m */,
 			);
 			name = Plugins;
-			path = MobileCircLite/Plugins;
+			path = GamePad/Plugins;
 			sourceTree = SOURCE_ROOT;
 		};
 		308D052D1370CCF300D202BF /* icons */ = {
@@ -307,9 +303,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1D6058900D05DD3D006BFB54 /* MobileCircLite */ = {
+		1D6058900D05DD3D006BFB54 /* GamePad */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "MobileCircLite" */;
+			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "GamePad" */;
 			buildPhases = (
 				304B58A110DAC018002A0835 /* Touch www folder */,
 				1D60588D0D05DD3D006BFB54 /* Resources */,
@@ -321,9 +317,9 @@
 			dependencies = (
 				301BF551109A68C00062928A /* PBXTargetDependency */,
 			);
-			name = MobileCircLite;
-			productName = MobileCircLite;
-			productReference = 1D6058910D05DD3D006BFB54 /* MobileCircLite.app */;
+			name = GamePad;
+			productName = GamePad;
+			productReference = 1D6058910D05DD3D006BFB54 /* GamePad.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -334,7 +330,7 @@
 			attributes = {
 				LastUpgradeCheck = 0430;
 			};
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "MobileCircLite" */;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "GamePad" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -358,7 +354,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				1D6058900D05DD3D006BFB54 /* MobileCircLite */,
+				1D6058900D05DD3D006BFB54 /* GamePad */,
 			);
 		};
 /* End PBXProject section */
@@ -413,7 +409,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "exec ${PROJECT_DIR}/../../chrome-cordova/integration/iosbuildstep.sh \"/Users/mmocny/dev/circ/package/\" \"/Users/mmocny/dev/cordova/cordova-js/pkg/\"";
+			shellScript = "exec ${PROJECT_DIR}/../../chrome-cordova/integration/iosbuildstep.sh \"${PROJECT_DIR}/../../experimental/gamepad/www\" \"/Users/mmocny/dev/cordova/cordova-js/pkg/\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -425,9 +421,9 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* AppDelegate.m in Sources */,
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
-				5496ACCD16A4B0B4005FF6A9 /* GCDAsyncSocket.m in Sources */,
-				5496ACCE16A4B0B4005FF6A9 /* GCDAsyncUdpSocket.m in Sources */,
-				5496ADE716AF17E5005FF6A9 /* ChromeSocket.m in Sources */,
+				5496ADCE16AEFF21005FF6A9 /* ChromeSocket.m in Sources */,
+				5496ADD316AEFF2C005FF6A9 /* GCDAsyncSocket.m in Sources */,
+				5496ADD416AEFF2C005FF6A9 /* GCDAsyncUdpSocket.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -487,12 +483,12 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "MobileCircLite/MobileCircLite-Prefix.pch";
+				GCC_PREFIX_HEADER = "GamePad/GamePad-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "MobileCircLite/MobileCircLite-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
-				PRODUCT_NAME = MobileCircLite;
+				INFOPLIST_FILE = "GamePad/GamePad-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				PRODUCT_NAME = GamePad;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -505,12 +501,12 @@
 				CLANG_WARN_OBJCPP_ARC_ABI = YES;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "MobileCircLite/MobileCircLite-Prefix.pch";
+				GCC_PREFIX_HEADER = "GamePad/GamePad-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "MobileCircLite/MobileCircLite-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
-				PRODUCT_NAME = MobileCircLite;
+				INFOPLIST_FILE = "GamePad/GamePad-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				PRODUCT_NAME = GamePad;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -530,7 +526,7 @@
 					"\"$(OBJROOT)/UninstalledProducts/include\"",
 					"\"$(BUILT_PRODUCTS_DIR)\"",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_LDFLAGS = (
 					"-weak_framework",
 					CoreFoundation,
@@ -565,7 +561,7 @@
 					"\"$(OBJROOT)/UninstalledProducts/include\"",
 					"\"$(BUILT_PRODUCTS_DIR)\"",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_LDFLAGS = (
 					"-weak_framework",
 					CoreFoundation,
@@ -588,7 +584,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "MobileCircLite" */ = {
+		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "GamePad" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1D6058940D05DD3E006BFB54 /* Debug */,
@@ -597,7 +593,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "MobileCircLite" */ = {
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "GamePad" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,

@@ -1,0 +1,17 @@
+{
+  "name": "GamePad",
+  "description": "",
+  "manifest_version": 2,
+  "version": "1.0.0",
+  "minimum_chrome_version": "23",
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+  "permissions": [
+    "storage",
+    { "socket": [ "tcp-connect:*:*", "tcp-listen:*:*" ] },
+    "<all_urls>"
+  ]
+}
