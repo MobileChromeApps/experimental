@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "RemoteControlPresentation",
+  "version": "1",
+  "minimum_chrome_version": "23",
+  "icons": {
+    "16": "icon_16.png",
+    "128": "icon_128.png"
+  },
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+  "permissions": [
+    {
+      "socket": [ "tcp-listen" ]
+    }
+  ]
+}
