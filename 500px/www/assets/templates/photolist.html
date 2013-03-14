@@ -1,0 +1,23 @@
+<div class="photolist" px-style="{{style}}">
+  <div class="inner clearfix">
+    <article ng-repeat="photo in photos" class="{{photo.class}}" px-photolist="photo">
+      <a href="" ng-click="setRoute('photoview', '/photos/' + photo.id, List)">
+        <span class="curtain"></span>
+        <img
+          data-photo-id="{{photo.id}}"
+          data-ng-alt="{{photo.alt}}"
+          data-height="{{photoSize || photo.height}}"
+          data-width="{{photoSize || photo.width}}"
+          />
+      </a>
+      <footer ng-show="photo.px_photolist_action">
+        <a href="" ng-click="setRoute('userview', '/users/' + photo.actor.id)">
+          <strong>{{photo.actor.fullname}}</strong>
+        </a>
+        {{photo.px_photolist_action}}
+        <strong>{{photo.name}}</strong>
+      </footer>
+    </article>
+  </div>
+</div>
+

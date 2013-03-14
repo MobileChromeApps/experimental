@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>500px</title>
+  <link href="assets/styles/main.less" rel="stylesheet/less" type="text/css" />
+  <script src="assets/scripts/jquery.min.js"></script>
+  <script src="assets/scripts/jquery.event.move.js"></script>
+  <script src="assets/scripts/jquery.event.swipe.js"></script>
+  <script src="assets/scripts/jquery.autogrow-textarea.js"></script>
+  <script src="assets/scripts/underscore.min.js"></script>
+  <script src="assets/scripts/angular.min.js"></script>
+  <script src="assets/scripts/px.home.js"></script>
+  <script src="assets/scripts/less.min.js"></script>
+</head>
+<body class="not-authenticated">
+  <section id="title"><div class="svg-wrapper"></div><img /></section>
+  <section ng-view ng-csp id="feature" class="clearfix open"></section>
+  <section ng-view ng-csp id="photoview" class="clearfix"></section>
+  <section ng-view ng-csp id="userview" class="clearfix"></section>
+  <div class="offline">No Connection. You are in offline mode.</div>
+</body>
+</html>
+

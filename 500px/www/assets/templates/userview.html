@@ -1,0 +1,89 @@
+<article>
+  <section class="user drawer">
+    <h1>{{user.fullname}}</h1>
+    <span>{{user.username}}</span>
+    <span class="badge plus" ng-show="user.upgrade_status == 1">Plus</span>
+    <span class="badge awesome" ng-show="user.upgrade_status == 2">Awesome</span>
+  <span class="badge admin" ng-show="user.admin">500px</span>
+  <dl>
+    <dt>Affection</dt>
+      <dd>{{user.affection}}</dd>
+      <dt>Followers</dt>
+      <dd>{{user.followers_count}}</dd>
+      <dt>Friends</dt>
+      <dd>{{user.friends_count}}</dd>
+    </dl>
+    <p>{{user.about}}</p>
+    <div class="equipment" ng-show="user.equipment.camera">
+      <strong>Cameras</strong>
+      <ul>
+        <li ng-repeat="camera in user.equipment.camera">{{camera}}</li>
+      </ul>
+      </div>
+    <div class="equipment" ng-show="user.equipment.lens">
+      <strong>Lenses</strong>
+      <ul>
+        <li ng-repeat="lens in user.equipment.lens">{{lens}}</li>
+      </ul>
+      </div>
+    <div class="equipment" ng-show="user.equipment.misc">
+      <strong>Equipment</strong>
+      <ul>
+        <li ng-repeat="misc in user.equipment.misc">{{misc}}</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="sidebar">
+    <div class="options">
+      <div class="nav-button user-avatar" data-drawer="user">
+        <div class="picture-wrapper">
+          <img
+            class="picture"
+            alt="{{user.fullname}}'s profile picture"
+            data-ng-src="{{userpic_blob}}"
+          />
+          <div class="overlay"></div>
+        </div>
+      </div>
+      <a
+        class="requires-authentication follow clearfix {{followSelected}}"
+        href=""
+        ng-click="followUser()">
+        {{followText}}
+      </a>
+    </div>
+
+    <form class="options">
+      <label class="photos user_{{id}}">
+        <input
+          ng-change="changePhotoFeature()"
+          type="radio"
+          ng-model="selectedFeature"
+          value="user"
+        />
+        <span>Photos</span>
+      </label>
+      <label class="flow user_{{id}}_flow">
+        <input
+          ng-change="changePhotoFeature('flow')"
+          type="radio"
+          ng-model="selectedFeature"
+          value="{{id}}"
+        />
+        <span>Flow</span>
+      </label>
+      <label class="favorites user_{{id}}_favorites">
+        <input
+          ng-change="changePhotoFeature()"
+          type="radio"
+          ng-model="selectedFeature"
+          value="user_favorites"
+        />
+        <span>Favorites</span>
+      </label>
+    </form>
+
+  </div>
+</article>
+

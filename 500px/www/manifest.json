@@ -1,0 +1,40 @@
+{
+  "manifest_version": 2,
+  "name": "500px",
+  "version": "1",
+  "minimum_chrome_version": "24",
+  "icons": {
+    "16": "assets/images/icon_16.png",
+    "128": "assets/images/icon_128.png"
+  },
+  "app": {
+    "background": {
+      "scripts" : [
+        "assets/scripts/oauth.js",
+        "assets/scripts/sha1.js",
+        "assets/scripts/underscore.min.js",
+        "assets/scripts/angular.min.js",
+        "assets/scripts/Class.js",
+        "assets/scripts/px.background.js",
+        "assets/scripts/px.utility.js",
+        "assets/scripts/px.photolist.js",
+        "assets/scripts/px.page.js",
+        "assets/scripts/px.page.feature.js",
+        "assets/scripts/px.page.photoview.js",
+        "assets/scripts/px.page.userview.js",
+        "assets/scripts/px.api.js"
+      ]
+    }
+  },
+  "permissions": [
+    "webview",
+    "storage",
+    "unlimitedStorage",
+    "experimental",
+    "http://500px.com/*",
+    "https://api.500px.com/v1/oauth/*",
+    "http://*.500px.net/*",
+    "https://s3.amazonaws.com/photos.500px.net/*"
+  ]
+}
+
