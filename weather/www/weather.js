@@ -599,8 +599,7 @@ function initHandlers() {
   }, false);
 }
 
-document.addEventListener("deviceready", function() {
-
+function init() {
   $(document.body).addClass((window.cordova !== undefined) ? 'mobile' : 'not-mobile');
 
   chrome.storage.sync.get(function(items) {
@@ -645,7 +644,13 @@ document.addEventListener("deviceready", function() {
       selectCity(city);
     }
   });
-});
+}
+
+if (typeof cordova !== 'undefined') {
+  document.addEventListener("deviceready", init);
+} else {
+  $(document).ready(init);
+}
 
 /******************************************************************************/
 /******************************************************************************/
