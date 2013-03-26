@@ -248,6 +248,10 @@ function refreshIScroll() {
   }, 0);
 }
 
+function hideLoading() {
+  $('#loading').addClass('hidden');
+}
+
 function hideSettings() {
   $('#weather').removeClass('hidden');
   $('#settings').addClass('hidden');
@@ -378,6 +382,7 @@ function refresh() {
     }
   });
   refreshIScroll();
+  hideLoading();
 }
 
 function updateCityDisplay(city, current_condition, forecast) {
@@ -594,7 +599,7 @@ function initHandlers() {
   }, false);
 }
 
-$(document).ready(function() {
+document.addEventListener("deviceready", function() {
 
   $(document.body).addClass((window.cordova !== undefined) ? 'mobile' : 'not-mobile');
 
@@ -621,7 +626,7 @@ $(document).ready(function() {
 
   setInterval(function() {
     updateAllWeatherData();
-  }, 1000 * 60 * 60 * 2);
+  }, 1000 * 60 * 5);
 
   myScroll = new iScroll('wrapper', {
     snap: true,
